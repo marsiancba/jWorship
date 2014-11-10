@@ -22,7 +22,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.text.AttributedString;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Timer;
@@ -59,8 +61,8 @@ import sk.asc.worship.panels.SongsPanel;
  */
 public class App extends JFrame implements ActionListener {
 
-	public final Action actionGo = new MyAction("Go!", null, KeyStroke
-			.getKeyStroke("F5")) {
+	public final Action actionGo = new MyAction("Go!", null,
+			KeyStroke.getKeyStroke("F5")) {
 		public void actionPerformed(ActionEvent e) {
 			go(Screen.ALL);
 		}
@@ -288,15 +290,23 @@ public class App extends JFrame implements ActionListener {
 		return panelSelector;
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InvocationTargetException,
+			InterruptedException {
 		if (args.length > 0 && args[0].equals("-testmode"))
 			testMode = true;
-		try {
-			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		new App().setVisible(true);
+		SwingUtilities.invokeAndWait(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					UIManager.setLookAndFeel(UIManager
+							.getSystemLookAndFeelClassName());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				new App().setVisible(true);
+
+			}
+		});
 	}
 
 	Transition currentTransition;
@@ -403,6 +413,8 @@ public class App extends JFrame implements ActionListener {
 	public App() {
 		super();
 
+		checkDirs();
+
 		loadSettings();
 
 		pictureBookmarksChanged();
@@ -428,6 +440,41 @@ public class App extends JFrame implements ActionListener {
 		transitionsLM.refresh();
 
 		setCurrentTransition(transitions.elementAt(1));
+	}
+
+	private void checkDirs() {
+		try {
+			ArrayList<File> dirs = new ArrayList<File>();
+			dirs.add(dirSettings.getCanonicalFile());
+			dirs.add(dirSongs.getCanonicalFile());
+			dirs.add(dirPictures.getCanonicalFile());
+			// dirs.add(dirVideos.getCanonicalFile());
+			ArrayList<File> badDirs = new ArrayList<File>();
+			StringBuilder badDirsS = new StringBuilder();
+			for (File d : dirs) {
+				if (!d.exists()) {
+					badDirs.add(d);
+					if (badDirsS.length() > 0)
+						badDirsS.append("\n");
+					badDirsS.append(d);
+				}
+			}
+			if (!badDirs.isEmpty()) {
+				if (JOptionPane.showConfirmDialog(null,
+						"Some required directories are missing. Do you want to create them?\n\n"
+								+ badDirsS.toString(), "jWorship " + version,
+						JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
+					throw new IllegalStateException();
+				for (File d : dirs) {
+					if (!d.mkdirs())
+						throw new IOException("failed to create: " + d);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(0);
+			throw new InternalError();
+		}
 	}
 
 	void pictureBookmarksChanged() {
@@ -535,9 +582,7 @@ public class App extends JFrame implements ActionListener {
 			gridBagConstraints3.gridy = 1;
 			gridBagConstraints3.fill = java.awt.GridBagConstraints.BOTH;
 			gridBagConstraints3.weightx = 1.0D;
-			jPanel
-					.add((Component) getScreenViewPrepared(),
-							gridBagConstraints1);
+			jPanel.add((Component) getScreenViewPrepared(), gridBagConstraints1);
 			jPanel.add((Component) getScreenViewLive(), gridBagConstraints2);
 			jPanel.add(getJPanel2(), gridBagConstraints3);
 		}
@@ -684,7 +729,7 @@ public class App extends JFrame implements ActionListener {
 			showOnThisScreen();
 	}
 
-	public static String version = "2.1.0";
+	public static String version = "3.0.0";
 
 	/**
 	 * This method initializes this
