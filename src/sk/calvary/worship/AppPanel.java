@@ -18,7 +18,9 @@ import javax.swing.JPanel;
  * Preferences - Java - Code Generation - Code and Comments
  */
 public class AppPanel extends JPanel {
-    public final App app;
+	private static final long serialVersionUID = -4486648756765029068L;
+
+	public final App app;
 
     private String panelName = "???";
 
@@ -70,7 +72,7 @@ public class AppPanel extends JPanel {
     }
 
     public Image getMediaImage(String media) {
-        return app.imageLoader.getImage(new File(media));
+        return App.imageLoader.getImage(new File(media));
     }
 
     public boolean isMediaDynamic(String media) {

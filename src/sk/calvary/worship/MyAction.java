@@ -12,6 +12,8 @@ import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
 public abstract class MyAction extends AbstractAction {
+	private static final long serialVersionUID = -459016470511043157L;
+
 	public MyAction(JPanel register, String name, Icon icon, KeyStroke key) {
 		super(name, icon);
 		if (key != null)

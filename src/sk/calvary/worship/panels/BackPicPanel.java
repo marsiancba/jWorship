@@ -19,7 +19,6 @@ import javax.swing.Action;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -48,51 +47,60 @@ import sk.calvary.worship.ThumbnailList;
  * Preferences - Java - Code Generation - Code and Comments
  */
 public class BackPicPanel extends AppPanel {
-	public final Action actionRemovePic = new MyAction(this, "Zmazat", null,
+	private static final long serialVersionUID = 5111069517158426699L;
+
+	public final Action actionRemovePic = new MyAction(this, app.ls(1037), null,
 			KeyStroke.getKeyStroke("DELETE")) {
+		private static final long serialVersionUID = 1637304553286228016L;
+
 		public void actionPerformed(ActionEvent e) {
 			removePic();
 		}
 
 	}; // @jve:decl-index=0:
 
-	public final Action actionBookmarkPic = new MyAction(this,
-			"Pridat zalozku", null, KeyStroke.getKeyStroke("ctrl B")) {
+	public final Action actionBookmarkPic = new MyAction(this, app.ls(1038), null, 
+			KeyStroke.getKeyStroke("ctrl B")) {
+		private static final long serialVersionUID = -1407583743912564851L;
+
 		public void actionPerformed(ActionEvent e) {
 			addBookmark();
 		}
 
 	}; // @jve:decl-index=0:
 
-	public final Action actionHistoryPic = new MyAction(this,
-			"Pridat do historie", null, KeyStroke.getKeyStroke("ctrl H")) {
+	public final Action actionHistoryPic = new MyAction(this, app.ls(1039), null,
+			KeyStroke.getKeyStroke("ctrl H")) {
+		private static final long serialVersionUID = -6305234775374608370L;
+
 		public void actionPerformed(ActionEvent e) {
 			addHistory();
 		}
 
 	}; // @jve:decl-index=0:
 
-	public final Action actionRemoveBookmarks = new MyAction(this,
-			"Vymazat zalozky", null, null) {
+	public final Action actionRemoveBookmarks = new MyAction(this, app.ls(1040), null, null) { 
+		private static final long serialVersionUID = 1823815217552737074L;
+
 		public void actionPerformed(ActionEvent e) {
 			PictureBookmarks b = (PictureBookmarks) getJListPictureBookmarks()
 					.getSelectedValue();
 			if (b == null)
 				return;
-			if (JOptionPane.showConfirmDialog(BackPicPanel.this, "Naozaj?") == JOptionPane.OK_OPTION) {
+			if (JOptionPane.showConfirmDialog(BackPicPanel.this, app.ls(1041)) == JOptionPane.OK_OPTION) {
 				app.getPictureBookmarksList().remove(b);
 			}
 		}
 	}; // @jve:decl-index=0:
 
-	public final Action actionRenameBookmarks = new MyAction(this,
-			"Premenovat zalozky", null, null) {
+	public final Action actionRenameBookmarks = new MyAction(this, app.ls(1042), null, null) {
+		private static final long serialVersionUID = -4877382953894655110L;
+
 		public void actionPerformed(ActionEvent e) {
-			PictureBookmarks b = (PictureBookmarks) getJListPictureBookmarks()
-					.getSelectedValue();
+			PictureBookmarks b = (PictureBookmarks) getJListPictureBookmarks().getSelectedValue();
 			if (b == null)
 				return;
-			String s = JOptionPane.showInputDialog(BackPicPanel.this, "Nazov:",
+			String s = JOptionPane.showInputDialog(BackPicPanel.this, app.ls(1030) + ":",
 					b.getName());
 			if (s != null && !s.isEmpty()) {
 				b.setName(s);
@@ -101,11 +109,11 @@ public class BackPicPanel extends AppPanel {
 		}
 	}; // @jve:decl-index=0:
 
-	public final Action actionSelectBookmarks = new MyAction(this,
-			"Predvol zalozky", null, null) {
+	public final Action actionSelectBookmarks = new MyAction(this, app.ls(1043), null, null) {
+		private static final long serialVersionUID = 285881004414684182L;
+
 		public void actionPerformed(ActionEvent e) {
-			PictureBookmarks b = (PictureBookmarks) getJListPictureBookmarks()
-					.getSelectedValue();
+			PictureBookmarks b = (PictureBookmarks) getJListPictureBookmarks().getSelectedValue();
 			if (b == null)
 				return;
 			app.getPictureBookmarksList().setSelectedForAdd(b);
@@ -113,11 +121,13 @@ public class BackPicPanel extends AppPanel {
 		}
 	}; // @jve:decl-index=0:
 
-	public final Action actionAddBookmarks = new MyAction(this, "Nove zalozky",
+	public final Action actionAddBookmarks = new MyAction(this, app.ls(1044),
 			null, null) {
+		private static final long serialVersionUID = 6655503401860183564L;
+
 		public void actionPerformed(ActionEvent e) {
-			String s = JOptionPane.showInputDialog(BackPicPanel.this, "Nazov:",
-					"nove zalozky");
+			String s = JOptionPane.showInputDialog(BackPicPanel.this, app.ls(1030) + ":",
+					app.ls(1044));
 			if (s != null && !s.isEmpty()) {
 				PictureBookmarks b = app.getPictureBookmarksList()
 						.addNewBookmarks(s);
@@ -133,8 +143,6 @@ public class BackPicPanel extends AppPanel {
 	private JScrollPane jScrollPane = null;
 
 	private ThumbnailList thumbnailList = null;
-
-	private JLabel jLabel = null;
 
 	private JPanel jPanel = null;
 
@@ -171,7 +179,7 @@ public class BackPicPanel extends AppPanel {
 	private JList jListHistoryBookmarks = null;
 
 	public BackPicPanel(App a) {
-		super(a, "Pozadie");
+		super(a, a.ls(1021));
 		initialize();
 		updateSelector();
 		initScreenDa(daScreen);
@@ -182,7 +190,7 @@ public class BackPicPanel extends AppPanel {
 		Bookmarks b = getThumbnailList().selectedBookmarks;
 		if (b == null || !(v instanceof Bookmark))
 			return;
-		if (JOptionPane.showConfirmDialog(this, "Naozaj vymazat?") != JOptionPane.OK_OPTION)
+		if (JOptionPane.showConfirmDialog(this, app.ls(1045)) != JOptionPane.OK_OPTION)
 			return;
 		b.remove((Bookmark) v);
 		getThumbnailList().updateContent();
@@ -228,8 +236,7 @@ public class BackPicPanel extends AppPanel {
 	private DirBrowser getDirBrowser() {
 		if (dirBrowser == null) {
 			dirBrowser = new DirBrowser(app);
-			dirBrowser
-					.setExtensions(new String[] { "jpg", "gif", "png", "bmp" });
+			dirBrowser.setExtensions(new String[] { "jpg", "gif", "png", "bmp" });
 			dirBrowser.setRoot(app.getDirPictures());
 		}
 		return dirBrowser;
@@ -335,7 +342,7 @@ public class BackPicPanel extends AppPanel {
 	private JButton getJButton() {
 		if (jButton == null) {
 			jButton = new JButton();
-			jButton.setText("Prazdne");
+			jButton.setText(app.ls(1046));
 			jButton.addMouseListener(new java.awt.event.MouseAdapter() {
 				public void mouseReleased(java.awt.event.MouseEvent e) {
 					if (e.getClickCount() == 2)
@@ -491,9 +498,9 @@ public class BackPicPanel extends AppPanel {
 		if (jTabbedPane == null) {
 			jTabbedPane = new JTabbedPane();
 			jTabbedPane.setPreferredSize(new Dimension(80, 60));
-			jTabbedPane.addTab("Vsetky", null, getJPanel5(), null);
-			jTabbedPane.addTab("Zalozky", null, getJPanel3(), null);
-			jTabbedPane.addTab("Historia", null, getJPanel4(), null);
+			jTabbedPane.addTab(app.ls(1047), null, getJPanelAllItems(), null);
+			jTabbedPane.addTab(app.ls(1048), null, getJPanelBookmarks(), null);
+			jTabbedPane.addTab(app.ls(1049), null, getJPanelHistory(), null);
 			jTabbedPane
 					.addChangeListener(new javax.swing.event.ChangeListener() {
 						public void stateChanged(javax.swing.event.ChangeEvent e) {
@@ -507,11 +514,11 @@ public class BackPicPanel extends AppPanel {
 	protected void updateSelector() {
 		Object c = getJTabbedPane().getSelectedComponent();
 		Object selector = null;
-		if (c == getJPanel5())
+		if (c == getJPanelAllItems())
 			selector = getDirBrowser();
-		if (c == getJPanel3())
+		if (c == getJPanelBookmarks())
 			selector = getJListPictureBookmarks();
-		if (c == getJPanel4())
+		if (c == getJPanelHistory())
 			selector = getJListHistoryBookmarks();
 		getThumbnailList().setSelector(selector);
 	}
@@ -521,7 +528,7 @@ public class BackPicPanel extends AppPanel {
 	 * 
 	 * @return javax.swing.JPanel
 	 */
-	private JPanel getJPanel3() {
+	private JPanel getJPanelBookmarks() {
 		if (jPanel3 == null) {
 			GridBagConstraints gridBagConstraints3 = new GridBagConstraints();
 			gridBagConstraints3.fill = GridBagConstraints.BOTH;
@@ -541,7 +548,7 @@ public class BackPicPanel extends AppPanel {
 	 * 
 	 * @return javax.swing.JPanel
 	 */
-	private JPanel getJPanel4() {
+	private JPanel getJPanelHistory() {
 		if (jPanel4 == null) {
 			GridBagConstraints gridBagConstraints4 = new GridBagConstraints();
 			gridBagConstraints4.fill = GridBagConstraints.BOTH;
@@ -563,7 +570,7 @@ public class BackPicPanel extends AppPanel {
 	 * 
 	 * @return javax.swing.JPanel
 	 */
-	private JPanel getJPanel5() {
+	private JPanel getJPanelAllItems() {
 		if (jPanel5 == null) {
 			GridBagConstraints gridBagConstraints2 = new GridBagConstraints();
 			gridBagConstraints2.gridx = 0;
@@ -598,12 +605,12 @@ public class BackPicPanel extends AppPanel {
 	 * 
 	 * @return javax.swing.JList
 	 */
-	@SuppressWarnings("serial")
 	private JList getJListPictureBookmarks() {
 		if (jListPictureBookmarks == null) {
 			jListPictureBookmarks = new JList();
 			jListPictureBookmarks
 					.setCellRenderer(new DefaultListCellRenderer.UIResource() {
+						private static final long serialVersionUID = 8108600847983921722L;
 
 						@Override
 						public Component getListCellRendererComponent(
@@ -615,7 +622,7 @@ public class BackPicPanel extends AppPanel {
 									"/sk/calvary/worship/bookmark.png")));
 							if (value == app.getPictureBookmarksList()
 									.getSelectedForAdd())
-								setText(getText() + " (predvolene)");
+								setText(getText() + " (" + app.ls(1050) + ")");
 							return this;
 						}
 
@@ -740,6 +747,7 @@ public class BackPicPanel extends AppPanel {
 			jListHistoryBookmarks = new JList();
 			jListHistoryBookmarks
 					.setCellRenderer(new DefaultListCellRenderer.UIResource() {
+						private static final long serialVersionUID = -129586494300964798L;
 
 						@Override
 						public Component getListCellRendererComponent(

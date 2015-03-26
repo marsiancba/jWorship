@@ -20,7 +20,9 @@ import javax.swing.event.ListDataListener;
  * Preferences - Java - Code Generation - Code and Comments
  */
 public class ProxyListModel extends AbstractListModel implements ListModel {
-    public ProxyListModel(ListModel source) {
+	private static final long serialVersionUID = -6790798180399590037L;
+
+	public ProxyListModel(ListModel source) {
         this.source = source;
         weakListener = new WeakListener(this);
     }
@@ -49,12 +51,12 @@ public class ProxyListModel extends AbstractListModel implements ListModel {
     }
 
     protected static class WeakListener implements ListDataListener {
-        WeakListener(ProxyListModel proxy) {
-            this.proxyRef = new WeakReference(proxy);
+		WeakListener(ProxyListModel proxy) {
+            this.proxyRef = new WeakReference<ProxyListModel>(proxy);
             proxy.source.addListDataListener(this);
         }
 
-        WeakReference proxyRef;
+        WeakReference<ProxyListModel> proxyRef;
 
         /**
          * @param e

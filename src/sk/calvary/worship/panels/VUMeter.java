@@ -13,6 +13,8 @@ import java.awt.Graphics;
 import javax.swing.JComponent;
 
 public class VUMeter extends JComponent {
+	private static final long serialVersionUID = 189919284563640827L;
+
 	public VUMeter() {
 		Dimension d = new Dimension(15, 50);
 		setMinimumSize(d);

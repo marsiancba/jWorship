@@ -51,6 +51,8 @@ import sk.calvary.worship.VerseCellRenderer;
  *         Window - Preferences - Java - Code Generation - Code and Comments
  */
 public class SongsPanel extends AppPanel implements PropertyChangeListener {
+	private static final long serialVersionUID = -2246317514234188954L;
+
 	private final VerseCellRenderer verseRenderer = new VerseCellRenderer();
 
 	private final DialogAssist daScreen = new DialogAssist(); // @jve:decl-index=0:
@@ -113,7 +115,7 @@ public class SongsPanel extends AppPanel implements PropertyChangeListener {
 	private JButton jButton123 = null;
 
 	public SongsPanel(App a) {
-		super(a, "Piesne");
+		super(a, a.ls(1051));
 		initialize();
 		app.addPropertyChangeListener(this);
 		initScreenDa(daScreen);
@@ -127,6 +129,11 @@ public class SongsPanel extends AppPanel implements PropertyChangeListener {
 			app.getGlobalInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
 					KeyStroke.getKeyStroke("typed " + c), actionName);
 			app.getGlobalActionMap().put(actionName, new AbstractAction() {
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 4077836760975067099L;
+
 				public void actionPerformed(ActionEvent e) {
 					// System.out.println(actionName);
 					JList l = getJListVerses();
@@ -145,6 +152,11 @@ public class SongsPanel extends AppPanel implements PropertyChangeListener {
 			// prepinanie pesniciek sipkami hore/dole v search policku
 			getJTextFieldSearch().getActionMap().put("prevsong",
 					new AbstractAction() {
+						/**
+						 * 
+						 */
+						private static final long serialVersionUID = 6377221399325450828L;
+
 						public void actionPerformed(ActionEvent e) {
 							// System.out.println(actionName);
 							JList l = getJListSongs();
@@ -159,6 +171,11 @@ public class SongsPanel extends AppPanel implements PropertyChangeListener {
 					});
 			getJTextFieldSearch().getActionMap().put("nextsong",
 					new AbstractAction() {
+						/**
+						 * 
+						 */
+						private static final long serialVersionUID = 6150687926311760207L;
+
 						public void actionPerformed(ActionEvent e) {
 							// System.out.println(actionName);
 							JList l = getJListSongs();
@@ -328,9 +345,9 @@ public class SongsPanel extends AppPanel implements PropertyChangeListener {
 			jPanel = new JPanel();
 			jPanel.setLayout(flowLayout16);
 			flowLayout16.setAlignment(java.awt.FlowLayout.RIGHT);
-			jPanel.add(getJButton1(), null);
-			jPanel.add(getJButton2(), null);
-			jPanel.add(getJButton(), null);
+			jPanel.add(getJButtonEdit(), null);
+			jPanel.add(getJButtonNew(), null);
+			jPanel.add(getJButtonEmpty(), null);
 		}
 		return jPanel;
 	}
@@ -340,10 +357,10 @@ public class SongsPanel extends AppPanel implements PropertyChangeListener {
 	 * 
 	 * @return javax.swing.JButton
 	 */
-	private JButton getJButton() {
+	private JButton getJButtonEmpty() {
 		if (jButton == null) {
 			jButton = new JButton();
-			jButton.setText("Prazdna");
+			jButton.setText(app.ls(1052));
 			jButton.addMouseListener(new java.awt.event.MouseAdapter() {
 				public void mouseReleased(java.awt.event.MouseEvent e) {
 					if (e.getClickCount() == 2)
@@ -364,10 +381,10 @@ public class SongsPanel extends AppPanel implements PropertyChangeListener {
 	 * 
 	 * @return javax.swing.JButton
 	 */
-	private JButton getJButton1() {
+	private JButton getJButtonEdit() {
 		if (jButton1 == null) {
 			jButton1 = new JButton();
-			jButton1.setText("Edituj");
+			jButton1.setText(app.ls(1053));
 			jButton1.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
 					editSong();
@@ -382,10 +399,10 @@ public class SongsPanel extends AppPanel implements PropertyChangeListener {
 	 * 
 	 * @return javax.swing.JButton
 	 */
-	private JButton getJButton2() {
+	private JButton getJButtonNew() {
 		if (jButton2 == null) {
 			jButton2 = new JButton();
-			jButton2.setText("Nova");
+			jButton2.setText(app.ls(1054));
 			jButton2.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
 					Song s = new Song();
@@ -509,7 +526,7 @@ public class SongsPanel extends AppPanel implements PropertyChangeListener {
 	private void editSong(Song s) {
 		SongEditor se = new SongEditor(app);
 		se.setSong(s);
-		se.show();
+		se.setVisible(true);
 		if (app.getSongs().contains(s)) {
 			app.getSongsLM().refresh();
 			app.getSongsLM().objectChanged(s);

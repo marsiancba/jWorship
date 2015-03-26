@@ -25,7 +25,7 @@ public abstract class Bookmarks<B extends Bookmark> implements Serializable {
 
 	protected abstract B[] getBlankArray();
 
-	transient BookmarksList owner;
+	transient BookmarksList<?> owner;
 
 	public String getName() {
 		return name;
@@ -64,7 +64,6 @@ public abstract class Bookmarks<B extends Bookmark> implements Serializable {
 
 	protected abstract B newBookmarkInstance(Object value);
 
-	@SuppressWarnings("unchecked")
 	protected Bookmarks(String name) {
 		created = Calendar.getInstance();
 		if (name != null)

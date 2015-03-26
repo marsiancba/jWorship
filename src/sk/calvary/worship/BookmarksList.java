@@ -9,8 +9,7 @@ package sk.calvary.worship;
 import java.io.Serializable;
 import java.util.Vector;
 
-public abstract class BookmarksList<B extends Bookmarks> implements
-		Serializable {
+public abstract class BookmarksList<B extends Bookmarks<?>> implements Serializable {
 	private static final long serialVersionUID = -2643552839035963798L;
 
 	Vector<B> bookmarks = new Vector<B>();
@@ -86,7 +85,7 @@ public abstract class BookmarksList<B extends Bookmarks> implements
 		b.addHeadValue(value);
 	}
 
-	public synchronized boolean contains(Bookmarks b) {
+	public synchronized boolean contains(Bookmarks<?> b) {
 		return bookmarks.contains(b);
 	}
 

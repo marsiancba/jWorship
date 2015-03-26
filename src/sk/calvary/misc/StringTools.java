@@ -18,10 +18,10 @@ import java.util.Map;
  */
 public final class StringTools {
 	static final String diakCharsSmall = //
-	"áäèïéí¾åòôóàøšúı";
+	"áäèïéí¾åòôóàøšúı¹æê³ñóœ¿Ÿ";
 
 	static final String diakCharsSmallNoDiak = //
-	"aacdeillnoorrstuyz";
+	"aacdeillnoorrstuyzacelnoszz";
 
 	static final String diakChars = diakCharsSmall
 			+ diakCharsSmall.toUpperCase();
@@ -63,8 +63,6 @@ public final class StringTools {
 				// Determine the runs, creating a new run when the attributes
 				// differ.
 				int offset = 0;
-				Map last = null;
-
 				for (int counter = 0; counter < iterators.length; counter++) {
 					AttributedCharacterIterator iterator = iterators[counter];
 					int start = iterator.getBeginIndex();
@@ -74,12 +72,10 @@ public final class StringTools {
 					while (index < end) {
 						iterator.setIndex(index);
 
-						Map attrs = iterator.getAttributes();
+						Map<AttributedCharacterIterator.Attribute, Object> attrs = iterator.getAttributes();
 
 						//if (mapsDiffer(last, attrs)) {
 						as.addAttributes(attrs, index - start + offset, len);
-						//}
-						last = attrs;
 						index = iterator.getRunLimit();
 					}
 					offset += (end - start);

@@ -21,10 +21,13 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.AttributedString;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Timer;
@@ -40,7 +43,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
@@ -48,6 +50,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import sk.calvary.misc.ImageLoader;
+import sk.calvary.misc.Lang;
 import sk.calvary.misc.ui.ObjectListModel;
 import sk.calvary.worship.panels.BackPicPanel;
 import sk.calvary.worship.panels.SettingsPanel;
@@ -60,60 +63,17 @@ import sk.calvary.worship.panels.SongsPanel;
  *         Window - Preferences - Java - Code Generation - Code and Comments
  */
 public class App extends JFrame implements ActionListener {
+	private static final long serialVersionUID = 5202531162861036082L;
+	
+	public final Action actionGo;
+	public final Action actionReverseGo;
+	public final Action actionGoText;
+	public final Action actionGoBackground;
+	public final Action actionSongSearch;
+	public final Action actionSaveAll;
 
-	public final Action actionGo = new MyAction("Go!", null,
-			KeyStroke.getKeyStroke("F5")) {
-		public void actionPerformed(ActionEvent e) {
-			go(Screen.ALL);
-		}
-
-	};
-
-	public final Action actionReverseGo = new MyAction("Reverse Go", null,
-			KeyStroke.getKeyStroke("shift F5")) {
-		public void actionPerformed(ActionEvent e) {
-			screenPrepared.copyFrom(screenLive, Screen.ALL);
-			updatePrepared();
-		}
-
-	};
-
-	public final Action actionGoText = new MyAction("Go Text", null, null) {
-		public void actionPerformed(ActionEvent e) {
-			go(Screen.TEXT);
-		}
-
-	};
-
-	public final Action actionGoBackground = new MyAction("Go Pozadie", null,
-			null) {
-		public void actionPerformed(ActionEvent e) {
-			go(Screen.BACKGROUND); // @jve:decl-index=0:
-		}
-
-	};
-
-	public final Action actionSongSearch = new MyAction("Hladaj piesen", null,
-			KeyStroke.getKeyStroke("ctrl F")) {
-		public void actionPerformed(ActionEvent e) {
-			getPanelSelector().ensureVisible(songsPanel);
-			SwingUtilities.invokeLater(new Runnable() {
-				public void run() {
-					JTextField tfs = songsPanel.getJTextFieldSearch();
-					tfs.selectAll();
-					tfs.requestFocus(); // @jve:decl-index=0:
-				}
-			});
-		}
-	};
-
-	public final Action actionSaveAll = new MyAction("Ulozit vsetko", null,
-			KeyStroke.getKeyStroke("ctrl S")) {
-		public void actionPerformed(ActionEvent e) {
-			saveAll();
-		}
-	};
-
+	public final int SETTING_LANGUAGE = 1;
+	
 	public static ImageLoader imageLoader = new ImageLoader();
 
 	public static Thumbnails thumbnails = new Thumbnails(imageLoader, 60, 45);
@@ -130,6 +90,9 @@ public class App extends JFrame implements ActionListener {
 
 	public static boolean testMode = false;
 
+	private Lang langObj = null;
+	public String language = null;
+	
 	/**
 	 * This method initializes jJMenuBar
 	 * 
@@ -153,7 +116,7 @@ public class App extends JFrame implements ActionListener {
 	private JMenu getJMenuScreens() {
 		if (jMenuScreens == null) {
 			jMenuScreens = new JMenu();
-			jMenuScreens.setText("Obrazovky");
+			jMenuScreens.setText(ls(1006));
 			jMenuScreens.add(getJMenuItemScreenProjector());
 			jMenuScreens.add(getJMenuItemScreenThis());
 			jMenuScreens.add(getJMenuItemScreenTest());
@@ -171,7 +134,7 @@ public class App extends JFrame implements ActionListener {
 	private JMenuItem getJMenuItemScreenProjector() {
 		if (jMenuItemScreenProjector == null) {
 			jMenuItemScreenProjector = new JMenuItem();
-			jMenuItemScreenProjector.setText("Projektor");
+			jMenuItemScreenProjector.setText(ls(1007));
 			jMenuItemScreenProjector
 					.addActionListener(new java.awt.event.ActionListener() {
 						public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -190,7 +153,7 @@ public class App extends JFrame implements ActionListener {
 	private JMenuItem getJMenuItemScreenThis() {
 		if (jMenuItemScreenThis == null) {
 			jMenuItemScreenThis = new JMenuItem();
-			jMenuItemScreenThis.setText("Tato obrazovka");
+			jMenuItemScreenThis.setText(ls(1008));
 			jMenuItemScreenThis
 					.addActionListener(new java.awt.event.ActionListener() {
 						public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -209,7 +172,7 @@ public class App extends JFrame implements ActionListener {
 	private JMenuItem getJMenuItemScreenTest() {
 		if (jMenuItemScreenTest == null) {
 			jMenuItemScreenTest = new JMenuItem();
-			jMenuItemScreenTest.setText("Skusobna obrazovka");
+			jMenuItemScreenTest.setText(ls(1009));
 			// jMenuItemScreenTest.setVisible(testMode);
 			jMenuItemScreenTest
 					.addActionListener(new java.awt.event.ActionListener() {
@@ -229,7 +192,7 @@ public class App extends JFrame implements ActionListener {
 	private JMenuItem getJMenuItemScreenCancelAll() {
 		if (jMenuItemScreenCancelAll == null) {
 			jMenuItemScreenCancelAll = new JMenuItem();
-			jMenuItemScreenCancelAll.setText("Zrusit vsetky");
+			jMenuItemScreenCancelAll.setText(ls(1010));
 			jMenuItemScreenCancelAll
 					.addActionListener(new java.awt.event.ActionListener() {
 						public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -252,7 +215,7 @@ public class App extends JFrame implements ActionListener {
 	private JMenu getJMenuActions() {
 		if (jMenuAkcie == null) {
 			jMenuAkcie = new JMenu();
-			jMenuAkcie.setText("Akcie");
+			jMenuAkcie.setText(ls(1011));
 			jMenuAkcie.add(new JMenuItem(actionGo));
 			jMenuAkcie.add(new JMenuItem(actionGoText));
 			jMenuAkcie.add(new JMenuItem(actionGoBackground));
@@ -272,7 +235,7 @@ public class App extends JFrame implements ActionListener {
 	private JMenu getJMenuFile() {
 		if (jMenuFile == null) {
 			jMenuFile = new JMenu();
-			jMenuFile.setText("Subor");
+			jMenuFile.setText(ls(1012));
 			jMenuFile.add(actionSaveAll);
 		}
 		return jMenuFile;
@@ -331,10 +294,6 @@ public class App extends JFrame implements ActionListener {
 
 	private JPanel jPanel2 = null;
 
-	private JScrollPane jScrollPane = null;
-
-	private JScrollPane jScrollPane1 = null;
-
 	private JSplitPane jSplitPane = null;
 
 	ScreenView[] liveScreens = new ScreenView[4];
@@ -368,9 +327,11 @@ public class App extends JFrame implements ActionListener {
 	ObjectListModel pictureBookmarksListLM = new ObjectListModel();
 
 	PictureBookmarksList pictureHistoryList = new PictureBookmarksList(this);
-
+	
 	ObjectListModel pictureHistoryListLM = new ObjectListModel();
-
+	
+	HashMap<Integer, String> generalSettings = new HashMap<Integer, String>(); 
+	
 	private JMenuBar jJMenuBar = null;
 
 	private JMenu jMenuScreens = null;
@@ -384,8 +345,6 @@ public class App extends JFrame implements ActionListener {
 	private JMenuItem jMenuItemScreenCancelAll = null;
 
 	private JMenu jMenuAkcie = null;
-
-	private JMenuItem jMenuItem = null;
 
 	private SongsPanel songsPanel;
 
@@ -412,7 +371,61 @@ public class App extends JFrame implements ActionListener {
 		checkDirs();
 
 		loadSettings();
+		loadLangs();
 
+		actionGo = new MyAction(ls(1000), null, KeyStroke.getKeyStroke("F5")) {
+			private static final long serialVersionUID = 6665128924643456924L;
+
+			public void actionPerformed(ActionEvent e) {
+				go(Screen.ALL);
+			}
+		};
+		actionReverseGo = new MyAction(ls(1001), null, KeyStroke.getKeyStroke("shift F5")) {
+			private static final long serialVersionUID = -3635843279198182926L;
+
+			public void actionPerformed(ActionEvent e) {
+				screenPrepared.copyFrom(screenLive, Screen.ALL);
+				updatePrepared();
+			}
+		};
+		actionGoText = new MyAction(ls(1002), null, null) {
+			private static final long serialVersionUID = 5193745723654508998L;
+
+			public void actionPerformed(ActionEvent e) {
+				go(Screen.TEXT);
+			}
+
+		};
+		actionGoBackground = new MyAction(ls(1003), null, null) {
+			private static final long serialVersionUID = 7804404775984692581L;
+
+			public void actionPerformed(ActionEvent e) {
+				go(Screen.BACKGROUND); // @jve:decl-index=0:
+			}
+
+		};
+		actionSongSearch = new MyAction(ls(1004), null, KeyStroke.getKeyStroke("ctrl F")) {
+			private static final long serialVersionUID = -6286284389819879458L;
+
+			public void actionPerformed(ActionEvent e) {
+				getPanelSelector().ensureVisible(songsPanel);
+				SwingUtilities.invokeLater(new Runnable() {
+					public void run() {
+						JTextField tfs = songsPanel.getJTextFieldSearch();
+						tfs.selectAll();
+						tfs.requestFocus(); // @jve:decl-index=0:
+					}
+				});
+			}
+		};
+		actionSaveAll = new MyAction(ls(1005), null, KeyStroke.getKeyStroke("ctrl S")) {
+			private static final long serialVersionUID = 2857605349748326463L;
+
+			public void actionPerformed(ActionEvent e) {
+				saveAll();
+			}
+		};
+		
 		pictureBookmarksChanged();
 		pictureHistoryChanged();
 
@@ -437,7 +450,7 @@ public class App extends JFrame implements ActionListener {
 
 		setCurrentTransition(transitions.elementAt(1));
 	}
-
+	
 	private void checkDirs() {
 		try {
 			ArrayList<File> dirs = new ArrayList<File>();
@@ -472,6 +485,40 @@ public class App extends JFrame implements ActionListener {
 			throw new InternalError();
 		}
 	}
+	
+	private void loadLangs() {
+		File file = new File(dirSettings, "lang.lng");
+		
+		try {
+			langObj = Lang.parse(new FileInputStream(file));
+		}
+		catch(FileNotFoundException e){
+			if (JOptionPane.showConfirmDialog(null, 
+					"Language file is missing.. Would you like to use default one?",
+					"jWorship " + version,
+					JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION)
+				throw new IllegalStateException("No language file found.");
+			
+			try {
+				Lang.copyDefaultLangFile(file);
+				//lang = Lang.parse(new FileInputStream(file));
+			}
+			catch (Exception ee) {
+				throw new IllegalStateException("An error occured during copying language.", ee);
+			}
+		}
+		catch (IOException eee) {
+			throw new IllegalStateException("An error occured during loading language.", eee);
+		}
+	}
+	
+	public String ls(int key){
+		return langObj.getString("#" + key, language);
+	}
+	
+	public String[] getLanguagesAvailable(){
+		return langObj.getLangs();
+	}
 
 	void pictureBookmarksChanged() {
 		pictureBookmarksListLM.setObjects(pictureBookmarksList.getBookmarks());
@@ -489,7 +536,8 @@ public class App extends JFrame implements ActionListener {
 		/*
 		 * try { Class.forName("javax.media.Manager"); panels.add(new
 		 * MultimediaPanel(this)); } catch (ClassNotFoundException e1) { }
-		 */panels.add(new SettingsPanel(this));
+		 */
+		panels.add(new SettingsPanel(this));
 		getPanelSelector().initialize();
 	}
 
@@ -523,7 +571,7 @@ public class App extends JFrame implements ActionListener {
 	private JButton getJButton() {
 		if (jButton == null) {
 			jButton = new JButton();
-			jButton.setText("GO!");
+			jButton.setText(ls(1000));
 			jButton.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
 					go(Screen.ALL);
@@ -717,7 +765,7 @@ public class App extends JFrame implements ActionListener {
 			showOnThisScreen();
 	}
 
-	public static String version = "3.0.0";
+	public static String version = "3.0.1";
 
 	/**
 	 * This method initializes this
@@ -756,11 +804,14 @@ public class App extends JFrame implements ActionListener {
 					"picturebookmarks.ser"), pictureBookmarksList);
 			SafeFileOutputStream.safeSave(new File(dirSettings,
 					"picturehistory.ser"), pictureHistoryList);
+			SafeFileOutputStream.safeSave(new File(dirSettings,
+					"generalSettings.ser"), generalSettings);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private void loadSettings() {
 		try {
 			pictureBookmarksList = (PictureBookmarksList) SafeFileOutputStream
@@ -769,15 +820,26 @@ public class App extends JFrame implements ActionListener {
 			pictureHistoryList = (PictureBookmarksList) SafeFileOutputStream
 					.safeLoad(new File(dirSettings, "picturehistory.ser"),
 							pictureHistoryList);
+			
+			loadDefaultGeneralSettings();
+			generalSettings = (HashMap<Integer, String>) SafeFileOutputStream.safeLoad(
+					new File(dirSettings, "generalSettings.ser"),
+					generalSettings
+				);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			pictureBookmarksList.app = this;
 			pictureBookmarksList.updateOwnership();
 			pictureHistoryList.app = this;
 			pictureHistoryList.updateOwnership();
+			
+			language = generalSettings.get(SETTING_LANGUAGE);
 		}
+	}
+	
+	private void loadDefaultGeneralSettings(){
+		generalSettings.put(SETTING_LANGUAGE, "sk");
 	}
 
 	void initializeFullScreen(int screen) {
@@ -834,7 +896,7 @@ public class App extends JFrame implements ActionListener {
 	protected void initializeProjector() {
 		synchronized (lock) {
 			if (!isDoubleScreen()) {
-				showError("System nie je nastaveny na projektor!");
+				showError(ls(1013));
 				return;
 			}
 			initializeFullScreen(debugmarsian ? SCREEN_FULLSCREEN_MY
@@ -890,6 +952,31 @@ public class App extends JFrame implements ActionListener {
 		firePropertyChange("currentTransition", old, this.currentTransition);
 	}
 
+	public void setCurrentLanguage(int language){
+		String value = langObj.getLangs()[language];
+		
+		if (!value.equals(this.language)){
+			firePropertyChange("language", value, this.language);
+			
+			this.language = value;
+			generalSettings.put(SETTING_LANGUAGE, this.language);
+			
+			if (JOptionPane.showConfirmDialog(this,
+					"The changes will appear after save and restart. Would You like to do it now?", "jWorship " + version,
+					JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+				restart();
+			}
+		}
+	}
+	
+	public void restart(){
+		saveAll();
+		
+		this.dispose();
+		
+		new App().setVisible(true);
+	}
+	
 	/**
 	 * @param selectedSong
 	 *            The selectedSong to set.
@@ -1048,7 +1135,7 @@ public class App extends JFrame implements ActionListener {
 		return getJPanel1().getActionMap();
 	}
 
-	public AppPanel getPanel(Class c) {
+	public AppPanel getPanel(Class<?> c) {
 		for (int i = 0; i < panels.size(); i++) {
 			AppPanel p = panels.elementAt(i);
 			if (p.getClass() == c)
@@ -1057,7 +1144,7 @@ public class App extends JFrame implements ActionListener {
 		return null;
 	}
 
-	void changed(BookmarksList bs) {
+	void changed(BookmarksList<?> bs) {
 		if (bs == pictureBookmarksList)
 			pictureBookmarksChanged();
 		if (bs == pictureHistoryList)

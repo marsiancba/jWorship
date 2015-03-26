@@ -13,5 +13,6 @@ package sk.calvary.misc.ui;
  * Preferences - Java - Code Generation - Code and Comments
  */
 public class CancelExceptionRuntime extends RuntimeException {
+	private static final long serialVersionUID = -1870250565104648427L;
 
 }

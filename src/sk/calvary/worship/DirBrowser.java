@@ -17,13 +17,11 @@ import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
 import sk.calvary.misc.FileTools;
-
-import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.ImageIcon;
 
 /**
  * @author marsian
@@ -32,9 +30,11 @@ import javax.swing.ImageIcon;
  * Preferences - Java - Code Generation - Code and Comments
  */
 public class DirBrowser extends JPanel {
+	private static final long serialVersionUID = 21096700074897497L;
+
 	File base;
 
-	Set extensions = new HashSet();
+	Set<String> extensions = new HashSet<String>();
 
 	private JScrollPane jScrollPane = null;
 
@@ -47,6 +47,7 @@ public class DirBrowser extends JPanel {
 	private final App app;
 
 	class MyTreeNode extends JTree.DynamicUtilTreeNode {
+		private static final long serialVersionUID = 7866835395459018498L;
 
 		MyTreeNode(File dir) {
 			super(dir.getName(), new Object[] {});
@@ -97,7 +98,6 @@ public class DirBrowser extends JPanel {
 		this.setLayout(new BorderLayout());
 		this.setSize(203, 212);
 		this.add(getJScrollPane(), java.awt.BorderLayout.CENTER);
-
 	}
 
 	/**
@@ -151,7 +151,7 @@ public class DirBrowser extends JPanel {
 	}
 
 	public File[] getSelectedFiles() {
-		Vector v = new Vector();
+		Vector<File> v = new Vector<File>();
 		TreePath selectionPath = getJTree().getSelectionPath();
 		if (selectionPath != null) {
 			MyTreeNode tn = (MyTreeNode) selectionPath.getLastPathComponent();

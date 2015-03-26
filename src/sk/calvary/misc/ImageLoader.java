@@ -10,7 +10,6 @@ import java.awt.Frame;
 import java.awt.Image;
 import java.awt.MediaTracker;
 import java.awt.Toolkit;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
@@ -23,7 +22,7 @@ import java.util.Hashtable;
  * Preferences - Java - Code Style - Code Templates
  */
 public class ImageLoader {
-	Hashtable cache = new Hashtable();
+	Hashtable<File, SoftReference<Image>> cache = new Hashtable<File, SoftReference<Image>>();
 
 	public ImageLoader() {
 
@@ -32,7 +31,7 @@ public class ImageLoader {
 	public Image getImage(File f) {
 		Image i = null;
 		synchronized (cache) {
-			Reference ref = (Reference) cache.get(f);
+			Reference<?> ref = (Reference<?>) cache.get(f);
 			if (ref != null) {
 				i = (Image) ref.get();
 			}
@@ -48,7 +47,7 @@ public class ImageLoader {
 			}
 			mt.removeImage(i);
 			synchronized (cache) {
-				cache.put(f, new SoftReference(i));
+				cache.put(f, new SoftReference<Image>(i));
 			}
 		}
 		return i;

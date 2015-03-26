@@ -10,8 +10,9 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
@@ -26,6 +27,7 @@ import javax.swing.JToggleButton;
 
 import sk.calvary.misc.ui.FloatSlider;
 import sk.calvary.misc.ui.List2ComboBoxModel;
+import sk.calvary.misc.ui.ObjectListModel;
 import sk.calvary.worship.App;
 import sk.calvary.worship.AppPanel;
 import sk.calvary.worship.DialogAssist;
@@ -50,13 +52,18 @@ import sk.calvary.worship.Screen;
  *         Window - Preferences - Java - Code Generation - Code and Comments
  */
 public class SettingsPanel extends AppPanel {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -9131726954554139220L;
+
 	final DialogAssist da = new DialogAssist();
 
 	final DialogAssist daApp = new DialogAssist();
 
-	private JPanel jPanel1 = null;
+	private JPanel jPanelText = null;
 
-	private JCheckBox jCheckBox = null;
+	private JCheckBox jCheckBoxWordWrap = null;
 
 	private FloatSlider floatSlider = null;
 
@@ -96,6 +103,7 @@ public class SettingsPanel extends AppPanel {
 	private JLabel jLabel = null;
 
 	private JComboBox jComboBox = null;
+	private JComboBox jComboBoxLanguage = null;
 
 	private JPanel jPanel11 = null;
 
@@ -107,7 +115,7 @@ public class SettingsPanel extends AppPanel {
 
 	private JLabel jLabel4 = null;
 
-	private JPanel jPanel = null;
+	private JPanel jPanelAdvanced = null;
 
 	private JToggleButton jButton = null;
 
@@ -116,7 +124,7 @@ public class SettingsPanel extends AppPanel {
 	private JToggleButton jToggleButton3 = null;
 
 	public SettingsPanel(App a) {
-		super(a, "Nastavenia");
+		super(a, a.ls(1014));
 		initialize();
 		initScreenDa(da);
 		try {
@@ -148,11 +156,11 @@ public class SettingsPanel extends AppPanel {
 		gridBagConstraints.gridy = 0;
 		this.setLayout(new GridBagLayout());
 		this.setSize(735, 321);
-		this.add(getJPanel1(), gridBagConstraints);
-		this.add(getJPanel6(), gridBagConstraints2);
-		this.add(getJPanel4(), gridBagConstraints5);
-		this.add(getJPanel(), new GridBagConstraints(0, 3, 1, 1, 0.0, 1.0,
-				GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL,
+		this.add(getPanelText(), gridBagConstraints);
+		this.add(getPanelBackground(), gridBagConstraints2);
+		this.add(getPanelApplication(), gridBagConstraints5);
+		this.add(getPanelAdvanced(), new GridBagConstraints(0, 3, 1, 1, 0.0,
+				1.0, GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL,
 				new Insets(0, 0, 0, 0), 0, 0));
 		this.add(getJPanel3(), new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0,
 				GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(
@@ -168,8 +176,8 @@ public class SettingsPanel extends AppPanel {
 	 * 
 	 * @return javax.swing.JPanel
 	 */
-	private JPanel getJPanel1() {
-		if (jPanel1 == null) {
+	private JPanel getPanelText() {
+		if (jPanelText == null) {
 			GridBagConstraints gridBagConstraints3 = new GridBagConstraints();
 			GridBagConstraints gridBagConstraints25 = new GridBagConstraints();
 			GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
@@ -178,10 +186,10 @@ public class SettingsPanel extends AppPanel {
 			jLabel1 = new JLabel();
 			GridBagConstraints gridBagConstraints4 = new GridBagConstraints();
 			GridBagConstraints gridBagConstraints7 = new GridBagConstraints();
-			jPanel1 = new JPanel();
-			jPanel1.setLayout(new GridBagLayout());
-			jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(
-					null, "Text",
+			jPanelText = new JPanel();
+			jPanelText.setLayout(new GridBagLayout());
+			jPanelText.setBorder(javax.swing.BorderFactory.createTitledBorder(
+					null, app.ls(1015),
 					javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
 					javax.swing.border.TitledBorder.DEFAULT_POSITION, null,
 					null));
@@ -193,7 +201,7 @@ public class SettingsPanel extends AppPanel {
 			gridBagConstraints7.gridx = 3;
 			gridBagConstraints7.gridy = 0;
 			gridBagConstraints7.weightx = 1.0D;
-			jLabel1.setText("velkost fontu");
+			jLabel1.setText(app.ls(1016));
 			gridBagConstraints10.gridx = 0;
 			gridBagConstraints10.gridy = 1;
 			gridBagConstraints10.anchor = java.awt.GridBagConstraints.WEST;
@@ -210,14 +218,14 @@ public class SettingsPanel extends AppPanel {
 			gridBagConstraints3.gridx = 1;
 			gridBagConstraints3.gridy = 1;
 			gridBagConstraints3.anchor = java.awt.GridBagConstraints.WEST;
-			jPanel1.add(getJCheckBox(), gridBagConstraints4);
-			jPanel1.add(getJCheckBox1(), gridBagConstraints10);
-			jPanel1.add(getJPanel2(), gridBagConstraints7);
-			jPanel1.add(getJCheckBox4(), gridBagConstraints1);
-			jPanel1.add(getJPanel8(), gridBagConstraints25);
-			jPanel1.add(getJPanel9(), gridBagConstraints3);
+			jPanelText.add(getCheckboxWordWrap(), gridBagConstraints4);
+			jPanelText.add(getCheckBoxTextSize(), gridBagConstraints10);
+			jPanelText.add(getJPanel2(), gridBagConstraints7);
+			jPanelText.add(getCheckBoxShadow(), gridBagConstraints1);
+			jPanelText.add(getJPanel8(), gridBagConstraints25);
+			jPanelText.add(getPanelTextAlign(), gridBagConstraints3);
 		}
-		return jPanel1;
+		return jPanelText;
 	}
 
 	/**
@@ -225,13 +233,13 @@ public class SettingsPanel extends AppPanel {
 	 * 
 	 * @return javax.swing.JCheckBox
 	 */
-	private JCheckBox getJCheckBox() {
-		if (jCheckBox == null) {
-			jCheckBox = new JCheckBox();
-			jCheckBox.setText("zalamovat text");
-			da.link("textWordWrap", jCheckBox);
+	private JCheckBox getCheckboxWordWrap() {
+		if (jCheckBoxWordWrap == null) {
+			jCheckBoxWordWrap = new JCheckBox();
+			jCheckBoxWordWrap.setText(app.ls(1017));
+			da.link("textWordWrap", jCheckBoxWordWrap);
 		}
-		return jCheckBox;
+		return jCheckBoxWordWrap;
 	}
 
 	/**
@@ -266,10 +274,10 @@ public class SettingsPanel extends AppPanel {
 	 * 
 	 * @return javax.swing.JCheckBox
 	 */
-	private JCheckBox getJCheckBox1() {
+	private JCheckBox getCheckBoxTextSize() {
 		if (jCheckBox1 == null) {
 			jCheckBox1 = new JCheckBox();
-			jCheckBox1.setText("zmensit text");
+			jCheckBox1.setText(app.ls(1018));
 			da.link("textFit", jCheckBox1);
 		}
 		return jCheckBox1;
@@ -280,7 +288,7 @@ public class SettingsPanel extends AppPanel {
 	 * 
 	 * @return javax.swing.JPanel
 	 */
-	private JPanel getJPanel4() {
+	private JPanel getPanelApplication() {
 		if (jPanel4 == null) {
 			GridBagConstraints gridBagConstraints26 = new GridBagConstraints();
 			gridBagConstraints26.gridx = 0;
@@ -295,7 +303,7 @@ public class SettingsPanel extends AppPanel {
 			jPanel4 = new JPanel();
 			jPanel4.setLayout(new GridBagLayout());
 			jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder(
-					null, "Aplikacia",
+					null, app.ls(1019),
 					javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
 					javax.swing.border.TitledBorder.DEFAULT_POSITION, null,
 					null));
@@ -305,10 +313,10 @@ public class SettingsPanel extends AppPanel {
 			gridBagConstraints14.gridx = 3;
 			gridBagConstraints14.gridy = 0;
 			gridBagConstraints14.weightx = 1.0D;
-			jPanel4.add(getJCheckBox2(), gridBagConstraints13);
+			jPanel4.add(getCheckBoxFullscreen(), gridBagConstraints13);
 			jPanel4.add(getJPanel5(), gridBagConstraints14);
-			jPanel4.add(getJPanel11(), gridBagConstraints12);
-			jPanel4.add(getJPanel12(), gridBagConstraints26);
+			jPanel4.add(getPanelAspectRatio(), gridBagConstraints12);
+			jPanel4.add(getPanelTransition(), gridBagConstraints26);
 		}
 		return jPanel4;
 	}
@@ -318,10 +326,10 @@ public class SettingsPanel extends AppPanel {
 	 * 
 	 * @return javax.swing.JCheckBox
 	 */
-	private JCheckBox getJCheckBox2() {
+	private JCheckBox getCheckBoxFullscreen() {
 		if (jCheckBox2 == null) {
 			jCheckBox2 = new JCheckBox();
-			jCheckBox2.setText("hned na celu obrazovku");
+			jCheckBox2.setText(app.ls(1020));
 			daApp.link("immediateFullScreen", jCheckBox2);
 		}
 		return jCheckBox2;
@@ -344,14 +352,14 @@ public class SettingsPanel extends AppPanel {
 	 * 
 	 * @return javax.swing.JPanel
 	 */
-	private JPanel getJPanel6() {
+	private JPanel getPanelBackground() {
 		if (jPanel6 == null) {
 			GridBagConstraints gridBagConstraints21 = new GridBagConstraints();
 			GridBagConstraints gridBagConstraints20 = new GridBagConstraints();
 			jPanel6 = new JPanel();
 			jPanel6.setLayout(new GridBagLayout());
 			jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder(
-					null, "Pozadie",
+					null, app.ls(1021),
 					javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
 					javax.swing.border.TitledBorder.DEFAULT_POSITION, null,
 					null));
@@ -361,7 +369,7 @@ public class SettingsPanel extends AppPanel {
 			gridBagConstraints21.gridx = 1;
 			gridBagConstraints21.gridy = 0;
 			gridBagConstraints21.weightx = 1.0D;
-			jPanel6.add(getJCheckBox3(), gridBagConstraints20);
+			jPanel6.add(getCheckBoxFillScreen(), gridBagConstraints20);
 			jPanel6.add(getJPanel7(), gridBagConstraints21);
 		}
 		return jPanel6;
@@ -372,10 +380,10 @@ public class SettingsPanel extends AppPanel {
 	 * 
 	 * @return javax.swing.JCheckBox
 	 */
-	private JCheckBox getJCheckBox3() {
+	private JCheckBox getCheckBoxFillScreen() {
 		if (jCheckBox3 == null) {
 			jCheckBox3 = new JCheckBox();
-			jCheckBox3.setText("pozadie vyplna celu obrazovku");
+			jCheckBox3.setText(app.ls(1022));
 			da.link("backgroundFillScreen", jCheckBox3);
 		}
 		return jCheckBox3;
@@ -398,10 +406,10 @@ public class SettingsPanel extends AppPanel {
 	 * 
 	 * @return javax.swing.JCheckBox
 	 */
-	private JCheckBox getJCheckBox4() {
+	private JCheckBox getCheckBoxShadow() {
 		if (jCheckBox4 == null) {
 			jCheckBox4 = new JCheckBox();
-			jCheckBox4.setText("tien");
+			jCheckBox4.setText(app.ls(1023));
 			da.link("textShadow", jCheckBox4);
 		}
 		return jCheckBox4;
@@ -430,7 +438,7 @@ public class SettingsPanel extends AppPanel {
 	 * 
 	 * @return javax.swing.JPanel
 	 */
-	private JPanel getJPanel9() {
+	private JPanel getPanelTextAlign() {
 		if (jPanel9 == null) {
 			jLabel = new JLabel();
 			FlowLayout flowLayout11 = new FlowLayout();
@@ -438,7 +446,7 @@ public class SettingsPanel extends AppPanel {
 			jPanel9.setLayout(flowLayout11);
 			flowLayout11.setAlignment(java.awt.FlowLayout.LEFT);
 			flowLayout11.setVgap(0);
-			jLabel.setText("zarovnanie:");
+			jLabel.setText(app.ls(1024) + ":");
 			jPanel9.add(jLabel, null);
 			jPanel9.add(getJToggleButton(), null);
 			jPanel9.add(getJToggleButton1(), null);
@@ -510,16 +518,37 @@ public class SettingsPanel extends AppPanel {
 		}
 		return jComboBox;
 	}
+	
+	private JComboBox getJComboBoxLanguage() {
+		if (jComboBoxLanguage == null) {
+			jComboBoxLanguage = new JComboBox();
+			ObjectListModel langs = new ObjectListModel();
+			langs.setObjects(app.getLanguagesAvailable());
+			jComboBoxLanguage.setModel(new List2ComboBoxModel(langs));
+			jComboBoxLanguage.setSelectedIndex(langs.indexOf(app.language));
+			
+			jComboBoxLanguage.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					jComboBoxLanguage.setPopupVisible(false);
+					app.setCurrentLanguage(jComboBoxLanguage.getSelectedIndex());
+				}
+			});
+			
+			//daApp.link("language", jComboBoxLanguage);
+		}
+		return jComboBoxLanguage;
+	}
 
 	/**
 	 * This method initializes jPanel11
 	 * 
 	 * @return javax.swing.JPanel
 	 */
-	private JPanel getJPanel11() {
+	private JPanel getPanelAspectRatio() {
 		if (jPanel11 == null) {
 			jLabel3 = new JLabel();
-			jLabel3.setText("pomer stran:");
+			jLabel3.setText(app.ls(1025) + ":");
 			jPanel11 = new JPanel();
 			jPanel11.add(jLabel3, null);
 			jPanel11.add(getFloatSlider1(), null);
@@ -550,12 +579,12 @@ public class SettingsPanel extends AppPanel {
 	 * 
 	 * @return javax.swing.JPanel
 	 */
-	private JPanel getJPanel12() {
+	private JPanel getPanelTransition() {
 		if (jPanel12 == null) {
 			FlowLayout flowLayout2 = new FlowLayout();
 			flowLayout2.setVgap(0);
 			jLabel4 = new JLabel();
-			jLabel4.setText("Prechod:");
+			jLabel4.setText(app.ls(1026) + ":");
 			jPanel12 = new JPanel();
 			jPanel12.setLayout(flowLayout2);
 			jPanel12.add(jLabel4, null);
@@ -569,20 +598,29 @@ public class SettingsPanel extends AppPanel {
 	 * 
 	 * @return javax.swing.JPanel
 	 */
-	private JPanel getJPanel() {
-		if (jPanel == null) {
-			jPanel = new JPanel();
+	private JPanel getPanelAdvanced() {
+		if (jPanelAdvanced == null) {
+			jPanelAdvanced = new JPanel();
 			GridBagLayout jPanelLayout = new GridBagLayout();
-			jPanel.setBorder(BorderFactory.createTitledBorder("Rozsirene"));
-			jPanel.setLayout(jPanelLayout);
-			jPanel.add(getJCheckBox5(), new GridBagConstraints(0, 0, 1, 1, 0.0,
+			jPanelAdvanced.setBorder(BorderFactory.createTitledBorder(app.ls(1027)));
+			jPanelAdvanced.setLayout(jPanelLayout);
+			
+			GridBagConstraints constraint = new GridBagConstraints(0, 0, 1, 1, 0.0,
 					0.0, GridBagConstraints.LINE_START,
-					GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-			jPanel.add(getJPanel10(), new GridBagConstraints(1, 0, 1, 1, 1.0,
+					GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0);
+			
+			jPanelAdvanced.add(getJCheckBox5(), constraint);
+			jPanelAdvanced.add(getJPanel10(), new GridBagConstraints(1, 0, 1, 1, 1.0,
 					0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE,
 					new Insets(0, 0, 0, 0), 0, 0));
+			
+			JLabel langLabel = new JLabel("Language: ");
+			constraint.gridy = 1;
+			jPanelAdvanced.add(langLabel, constraint);	
+			constraint.gridx = 1;
+			jPanelAdvanced.add(getJComboBoxLanguage(), constraint);	
 		}
-		return jPanel;
+		return jPanelAdvanced;
 	}
 
 	/**

@@ -29,6 +29,7 @@ import sk.calvary.misc.StringTools;
  * Preferences - Java - Code Generation - Code and Comments
  */
 public class VerseCellRenderer extends JTextArea implements ListCellRenderer {
+	private static final long serialVersionUID = 2679143388582920003L;
 
 	SearchTerm highlight;
 

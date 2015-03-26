@@ -6,9 +6,6 @@
  */
 package sk.calvary.misc.ui;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -20,7 +17,9 @@ import javax.swing.event.ChangeListener;
  * Preferences - Java - Code Generation - Code and Comments
  */
 public class FloatSlider extends JSlider {
-    float fMin = 0;
+	private static final long serialVersionUID = 8445395338646104614L;
+
+	float fMin = 0;
 
     float fMax = 1;
 
@@ -50,7 +49,6 @@ public class FloatSlider extends JSlider {
     void internalUpdate() {
         setMinimum(0);
         setMaximum(10000);
-        int v = 0;
         if (fMin < fMax)
             setValue((int) ((fValue - fMin) / (fMax - fMin) * 10000));
     }

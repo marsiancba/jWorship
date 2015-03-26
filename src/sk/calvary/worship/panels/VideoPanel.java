@@ -45,8 +45,7 @@ import sk.calvary.worship.jmf.Video2ImageListener;
 import com.sun.media.ui.VideoFormatChooser;
 
 public class VideoPanel extends AppPanel implements Video2ImageListener {
-    public static final String[] EXTENSIONS = new String[] { "avi", "mov", "mpeg", "mpg",
-	                "wmv" };
+    public static final String[] EXTENSIONS = new String[] { "avi", "mov", "mpeg", "mpg", "wmv" };
 
 	private static final String captureMediaType = "capturevideo";
 

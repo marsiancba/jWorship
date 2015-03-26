@@ -2,6 +2,7 @@ package sk.calvary.worship;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -22,6 +23,7 @@ import sk.calvary.misc.ui.UITools;
 
 import java.awt.Font;
 
+@SuppressWarnings("serial")
 public class SongEditor extends JDialog {
 	final App app;
 
@@ -29,7 +31,7 @@ public class SongEditor extends JDialog {
 
 	private JPanel jContentPane = null;
 
-	private JLabel jLabel = null;
+	private JLabel jLabelName = null;
 
 	private JTextField jTextField = null;
 
@@ -45,9 +47,9 @@ public class SongEditor extends JDialog {
 
 	private Song song;
 
-	private JLabel jLabel1 = null;
+	private JLabel jLabelName2 = null;
 
-	private JLabel jLabel2 = null;
+	private JLabel jLabelAutor = null;
 
 	private JTextField jTextField1 = null;
 
@@ -87,18 +89,18 @@ public class SongEditor extends JDialog {
 			gridBagConstraints3.anchor = java.awt.GridBagConstraints.WEST;
 			gridBagConstraints3.insets = new java.awt.Insets(0, 5, 5, 5);
 			gridBagConstraints3.gridy = 2;
-			jLabel2 = new JLabel();
-			jLabel2.setText("Autor:");
+			jLabelAutor = new JLabel();
+			jLabelAutor.setText(app.ls(1028) + ":");
 			GridBagConstraints gridBagConstraints = new GridBagConstraints();
 			gridBagConstraints.gridx = 0;
 			gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
 			gridBagConstraints.insets = new java.awt.Insets(0, 5, 5, 5);
 			gridBagConstraints.gridy = 1;
-			jLabel1 = new JLabel();
-			jLabel1.setText("Nazov2:");
+			jLabelName2 = new JLabel();
+			jLabelName2.setText(app.ls(1029) + ":");
 			GridBagConstraints gridBagConstraints2 = new GridBagConstraints();
 			GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
-			jLabel = new JLabel();
+			jLabelName = new JLabel();
 			GridBagConstraints gridBagConstraints17 = new GridBagConstraints();
 			GridBagConstraints gridBagConstraints16 = new GridBagConstraints();
 
@@ -114,7 +116,7 @@ public class SongEditor extends JDialog {
 			gridBagConstraints17.anchor = java.awt.GridBagConstraints.WEST;
 			gridBagConstraints17.gridy = 0;
 			gridBagConstraints17.insets = new java.awt.Insets(5, 5, 5, 5);
-			jLabel.setText("Nazov:");
+			jLabelName.setText(app.ls(1030) + ":");
 			gridBagConstraints1.gridx = 0;
 			gridBagConstraints1.gridy = 4;
 			gridBagConstraints1.gridwidth = 2;
@@ -127,11 +129,11 @@ public class SongEditor extends JDialog {
 			gridBagConstraints2.gridwidth = 2;
 			gridBagConstraints2.insets = new java.awt.Insets(0, 5, 5, 5);
 			jContentPane.add(getJTextField(), gridBagConstraints16);
-			jContentPane.add(jLabel, gridBagConstraints17);
+			jContentPane.add(jLabelName, gridBagConstraints17);
 			jContentPane.add(getJPanel(), gridBagConstraints1);
 			jContentPane.add(getJScrollPane(), gridBagConstraints2);
-			jContentPane.add(jLabel1, gridBagConstraints);
-			jContentPane.add(jLabel2, gridBagConstraints3);
+			jContentPane.add(jLabelName2, gridBagConstraints);
+			jContentPane.add(jLabelAutor, gridBagConstraints3);
 			jContentPane.add(getJTextField1(), gridBagConstraints4);
 			jContentPane.add(getJTextField2(), gridBagConstraints5);
 			jContentPane.add(getJButton(), gridBagConstraints11);
@@ -152,7 +154,7 @@ public class SongEditor extends JDialog {
 	}
 
 	private void initialize() {
-		this.setTitle("Piesen");
+		this.setTitle(app.ls(1031));
 		this.setModal(true);
 		this.setContentPane(getJContentPane());
 		this.setSize(700, 600);
@@ -162,7 +164,7 @@ public class SongEditor extends JDialog {
 			public void actionPerformed(ActionEvent e) {
 				if (e.getID() == DialogAssist.ACTION_BEFORE_OK) {
 					if (JOptionPane.showConfirmDialog(SongEditor.this,
-							"Naozaj ulozit piesen?", da.getComponentValue(
+							app.ls(1032), da.getComponentValue(
 									"title").toString(),
 							JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) {
 						throw new CancelExceptionRuntime();
@@ -251,7 +253,7 @@ public class SongEditor extends JDialog {
 	private JButton getJButtonCancel() {
 		if (jButtonCancel == null) {
 			jButtonCancel = new JButton();
-			jButtonCancel.setText("Zrusit");
+			jButtonCancel.setText(app.ls(1033));
 		}
 		return jButtonCancel;
 	}
@@ -264,7 +266,8 @@ public class SongEditor extends JDialog {
 	private JTextArea getJTextArea() {
 		if (jTextArea == null) {
 			jTextArea = new JTextArea();
-			jTextArea.setFont(new Font("Arial", Font.PLAIN, 16));
+			jTextArea.setFont(new Font("Arial", Font.PLAIN, 18));
+			jTextArea.setMargin(new Insets(2, 5, 2, 2));
 			undo = UITools.addUndoSupport(jTextArea);
 			da.link("plainText", jTextArea);
 		}
@@ -331,12 +334,12 @@ public class SongEditor extends JDialog {
 			jButton.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
 					if (JOptionPane.showConfirmDialog(app,
-							"Zvacsit pismenka v nazve?") == JOptionPane.YES_OPTION) {
+							app.ls(1034)) == JOptionPane.YES_OPTION) {
 						getJTextField().setText(
 								getJTextField().getText().toUpperCase());
 					}
 					if (JOptionPane.showConfirmDialog(app,
-							"Zvacsit pismenka v texte?") == JOptionPane.YES_OPTION) {
+							app.ls(1035)) == JOptionPane.YES_OPTION) {
 						getJTextArea().setText(
 								getJTextArea().getText().toUpperCase());
 					}
@@ -344,5 +347,10 @@ public class SongEditor extends JDialog {
 			});
 		}
 		return jButton;
+	}
+	
+	public static void main(String[] args){
+		SongEditor songEditor = new SongEditor(null);
+		songEditor.show();
 	}
 } // @jve:decl-index=0:visual-constraint="10,10"

@@ -8,7 +8,6 @@ package sk.calvary.worship;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import java.util.Arrays;
 import java.util.Vector;
 
 import javax.swing.JPanel;
@@ -20,6 +19,8 @@ import sk.calvary.worship.panels.BackPicPanel;
 import sk.calvary.worship.panels.SongsPanel;
 
 public class PanelSelector extends JPanel {
+	private static final long serialVersionUID = 1L;
+	
 	App app;
 
 	public PanelSelector() {
@@ -74,7 +75,7 @@ public class PanelSelector extends JPanel {
 	// g.add(ap);
 	// p.add(g);
 	// }
-	// }
+// }
 
 	// private void buildPanelSelector() {
 	// JPanel ps = getJPanelSelector();
@@ -121,6 +122,8 @@ public class PanelSelector extends JPanel {
 	}
 
 	class TabPanelSwitcher extends JPanel implements ChangeListener {
+		private static final long serialVersionUID = 1L;
+
 		private final JPanel tab;
 
 		private final AppPanel panel;

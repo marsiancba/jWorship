@@ -38,8 +38,6 @@ public class ThumbnailList extends JList {
 
 	private Object selector;
 
-	private DirBrowser browser;
-
 	public ThumbnailList() {
 		this(null);
 	}
@@ -66,7 +64,7 @@ public class ThumbnailList extends JList {
 		if (selector instanceof JList) {
 			Object o = ((JList) selector).getSelectedValue();
 			if (o instanceof Bookmarks) {
-				Bookmarks b = (Bookmarks) o;
+				Bookmarks<?> b = (Bookmarks<?>) o;
 				files.setObjects(b.getBookmarks());
 				selectedBookmarks = b;
 				return;
@@ -111,7 +109,7 @@ public class ThumbnailList extends JList {
 
 	public final ObjectListModel files = new ObjectListModel();
 
-	public Bookmarks selectedBookmarks;
+	public Bookmarks<?> selectedBookmarks;
 
 	public String getSelectedMedia() {
 		return ImageListCellRenderer.getMedia(getSelectedValue());

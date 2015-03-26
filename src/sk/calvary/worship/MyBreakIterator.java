@@ -1,7 +1,6 @@
 package sk.calvary.worship;
 
 import java.text.AttributedCharacterIterator;
-import java.text.AttributedString;
 import java.text.BreakIterator;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;

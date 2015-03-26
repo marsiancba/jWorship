@@ -14,7 +14,9 @@ public class ObjectPropertyTableModel extends
         javax.swing.table.AbstractTableModel implements
         javax.swing.event.ListDataListener {
 
-    String columnsAsString = "";
+	private static final long serialVersionUID = -7146768875526970928L;
+
+	String columnsAsString = "";
 
     String columns[] = new String[0];
 

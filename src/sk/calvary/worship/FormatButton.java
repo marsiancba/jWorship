@@ -12,8 +12,8 @@ import java.awt.Dimension;
 import javax.swing.JToggleButton;
 
 public class FormatButton extends JToggleButton {
+	private static final long serialVersionUID = 8159562839448552818L;
 	
-
 	private static final Dimension DIMENSION = new Dimension(22, 22);
 
 	public FormatButton() {

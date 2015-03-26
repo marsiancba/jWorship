@@ -27,8 +27,10 @@ import sk.calvary.misc.StringTools;
  * Preferences - Java - Code Generation - Code and Comments
  */
 public class ListPropertyTableModel extends AbstractTableModel {
-    ProxyListModel proxyList;
-    Class rowClass;
+	private static final long serialVersionUID = -5852131851499438176L;
+	
+	ProxyListModel proxyList;
+    Class<?> rowClass;
 
     public ListPropertyTableModel(ListModel list) {
         proxyList = new ProxyListModel(list);
@@ -47,7 +49,7 @@ public class ListPropertyTableModel extends AbstractTableModel {
         });
     }
 
-    public ListPropertyTableModel(ObjectListModel list, Class rowClass,
+    public ListPropertyTableModel(ObjectListModel list, Class<?> rowClass,
             String columns) {
         this(list);
         this.rowClass = rowClass;
@@ -125,7 +127,7 @@ public class ListPropertyTableModel extends AbstractTableModel {
         newColumnsAsString = newColumnsAsString.replace(',', ' ');
         columnsAsString = newColumnsAsString;
 
-        Vector v = new Vector();
+        Vector<String> v = new Vector<String>();
         StringTokenizer st = new StringTokenizer(columnsAsString);
         while (st.hasMoreTokens()) {
             v.addElement(st.nextToken());
@@ -173,7 +175,7 @@ public class ListPropertyTableModel extends AbstractTableModel {
         return sb.toString();
     }
 
-    public Class getColumnClass(int columnIndex) {
+    public Class<?> getColumnClass(int columnIndex) {
         if (rowClass == null)
             return super.getColumnClass(columnIndex);
         try {

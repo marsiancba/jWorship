@@ -9,7 +9,6 @@ package sk.calvary.worship;
 import java.awt.BorderLayout;
 import java.io.File;
 import java.io.IOException;
-import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -24,9 +23,10 @@ import javax.swing.JToolBar;
  * TODO To change the template for this generated type comment go to Window -
  * Preferences - Java - Code Style - Code Templates
  */
-public class KonvertujPiesne extends JFrame {
+public class SongConverter extends JFrame {
+	private static final long serialVersionUID = 6080720181306701017L;
 
-    private JPanel jContentPane = null;
+	private JPanel jContentPane = null;
 
     private JToolBar jToolBar = null;
 
@@ -40,7 +40,7 @@ public class KonvertujPiesne extends JFrame {
      * This method initializes
      * 
      */
-    public KonvertujPiesne() {
+    public SongConverter() {
         super();
         initialize();
     }
@@ -178,6 +178,6 @@ public class KonvertujPiesne extends JFrame {
     }
 
     public static void main(String[] args) {
-        new KonvertujPiesne().show();
+        new SongConverter().setVisible(true);
     }
 } // @jve:decl-index=0:visual-constraint="10,10"

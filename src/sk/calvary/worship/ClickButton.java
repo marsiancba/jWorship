@@ -10,10 +10,10 @@ import java.awt.Color;
 import java.awt.Dimension;
 
 import javax.swing.JButton;
-import javax.swing.JToggleButton;
 
 public class ClickButton extends JButton {
-
+	private static final long serialVersionUID = 3006044683030843649L;
+	
 	private static final Dimension DIMENSION = new Dimension(22, 22);
 
 	public ClickButton() {

@@ -8,12 +8,14 @@ import java.util.Vector;
  * @author:
  */
 public class ObjectListModel extends javax.swing.DefaultListModel {
-    protected Vector sourceVector;
+	private static final long serialVersionUID = 7816188842543917124L;
+	
+	protected Vector<?> sourceVector;
 
     public ObjectListModel() {
     }
 
-    public ObjectListModel(Vector src, boolean refresh) {
+    public ObjectListModel(Vector<?> src, boolean refresh) {
         sourceVector = src;
         if (refresh)
             refresh();

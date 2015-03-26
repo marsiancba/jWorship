@@ -91,8 +91,6 @@ public class ScreenViewSwing extends JComponent implements ScreenView, Runnable 
 	 */
 	public void setScreen(Screen screen) {
 		Screen oldScreen = this.screen;
-		Rectangle oldTargetRect = targetRect;
-
 		this.screen = screen.getFrozenInstance();
 		recomputeTargetRectangle();
 
@@ -140,7 +138,7 @@ public class ScreenViewSwing extends JComponent implements ScreenView, Runnable 
 		app.liveScreens[index] = this;
 		fullScreenMode = mode;
 		fullScreenGraphicsDevice = gd;
-		String frameName = App.class.getName() + " fullscreen";
+		String frameName = App.class.getName() + " " + app.ls(1036);
 		GraphicsConfiguration gc = gd.getDefaultConfiguration();
 		if (fullScreenMode == MODE_SWING) {
 			fullScreenFrame = new JFrame(frameName, gc);

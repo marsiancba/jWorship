@@ -22,6 +22,8 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EtchedBorder;
 
 public class ImageListCellRenderer extends DefaultListCellRenderer {
+	private static final long serialVersionUID = -9063091792011363300L;
+
 	JLabel jLabelImage = new JLabel();
 
 	JPanel jPanel = new JPanel();

@@ -16,6 +16,7 @@ import javax.swing.ListModel;
  * Preferences - Java - Code Generation - Code and Comments
  */
 public class List2ComboBoxModel extends ProxyListModel implements ComboBoxModel {
+	private static final long serialVersionUID = 3329229849479091151L;
 
 	public List2ComboBoxModel(ListModel source) {
 		super(source);
