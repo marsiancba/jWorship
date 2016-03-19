@@ -73,6 +73,8 @@ public class App extends JFrame implements ActionListener {
 	public final Action actionSaveAll;
 
 	public final int SETTING_LANGUAGE = 1;
+	public final int SETTING_ASPECT_RATIO = 2;
+	public final int SETTING_TRANSITION = 3;
 	
 	public static ImageLoader imageLoader = new ImageLoader();
 
@@ -330,7 +332,7 @@ public class App extends JFrame implements ActionListener {
 	
 	ObjectListModel pictureHistoryListLM = new ObjectListModel();
 	
-	HashMap<Integer, String> generalSettings = new HashMap<Integer, String>(); 
+	public HashMap<Integer, String> generalSettings = new HashMap<Integer, String>(); 
 	
 	private JMenuBar jJMenuBar = null;
 
@@ -428,6 +430,9 @@ public class App extends JFrame implements ActionListener {
 		
 		pictureBookmarksChanged();
 		pictureHistoryChanged();
+		
+		loadTransitions();
+		transitionsLM.refresh();
 
 		loadPanels();
 
@@ -445,10 +450,7 @@ public class App extends JFrame implements ActionListener {
 		}
 		songsLM.refresh();
 
-		loadTransitions();
-		transitionsLM.refresh();
-
-		setCurrentTransition(transitions.elementAt(1));
+		setCurrentTransition(transitions.elementAt(Integer.valueOf(generalSettings.get(SETTING_TRANSITION))));
 	}
 	
 	private void checkDirs() {
@@ -821,11 +823,11 @@ public class App extends JFrame implements ActionListener {
 					.safeLoad(new File(dirSettings, "picturehistory.ser"),
 							pictureHistoryList);
 			
-			loadDefaultGeneralSettings();
 			generalSettings = (HashMap<Integer, String>) SafeFileOutputStream.safeLoad(
 					new File(dirSettings, "generalSettings.ser"),
 					generalSettings
 				);
+			loadDefaultGeneralSettings();
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -839,7 +841,17 @@ public class App extends JFrame implements ActionListener {
 	}
 	
 	private void loadDefaultGeneralSettings(){
-		generalSettings.put(SETTING_LANGUAGE, "sk");
+		System.out.println(generalSettings);
+		if (!generalSettings.containsKey(SETTING_LANGUAGE)){
+			generalSettings.put(SETTING_LANGUAGE, "sk");
+		}
+		if (!generalSettings.containsKey(SETTING_ASPECT_RATIO)){
+			generalSettings.put(SETTING_ASPECT_RATIO, "4:3");
+		}
+		if (!generalSettings.containsKey(SETTING_TRANSITION)){
+			generalSettings.put(SETTING_TRANSITION, "1");
+		}
+		System.out.println(generalSettings);
 	}
 
 	void initializeFullScreen(int screen) {
@@ -945,10 +957,20 @@ public class App extends JFrame implements ActionListener {
 
 		for (int i = 0; i < liveScreens.length; i++) {
 			ScreenView s = liveScreens[i];
-			if (s != null)
+			if (s != null){
 				s.setTransition(currentTransition);
+			}
 		}
 
+		if (old != currentTransition){
+			String value = String.valueOf(transitions.indexOf(currentTransition));
+			
+			if (value != generalSettings.get(SETTING_TRANSITION)){
+				generalSettings.put(SETTING_TRANSITION, value);
+				saveAll();
+			}
+		}
+		
 		firePropertyChange("currentTransition", old, this.currentTransition);
 	}
 

@@ -514,6 +514,8 @@ public class SettingsPanel extends AppPanel {
 		if (jComboBox == null) {
 			jComboBox = new JComboBox();
 			jComboBox.setModel(new List2ComboBoxModel(app.getTransitionsLM()));
+			System.out.println(Integer.valueOf(app.generalSettings.get(app.SETTING_TRANSITION)));
+			jComboBox.setSelectedIndex(Integer.valueOf(app.generalSettings.get(app.SETTING_TRANSITION)));
 			daApp.link("currentTransition", jComboBox);
 		}
 		return jComboBox;
