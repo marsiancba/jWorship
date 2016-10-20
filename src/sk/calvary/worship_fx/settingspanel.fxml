@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<?import sk.calvary.worship_fx.*?>
+
+
+<?language javascript?>
+<?import javafx.scene.Group?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.GridPane?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1"
+	spacing="5"
+	style="-fx-padding: 5 5 5 5"
+	fx:controller="sk.calvary.worship_fx.SettingsPanel" 
+	>
+	<TitledPane collapsible="false" text="Text">
+		<VBox style="-fx-padding: 5 5 5 5">
+			<CheckBox text="Tien" fx:id="cbShadow"></CheckBox>
+			<CheckBox text="Zalamovat" fx:id="cbTextWordWrap"></CheckBox>
+		</VBox>
+		<fx:script>
+			var Bindings=javafx.beans.binding.Bindings;
+			Bindings.bindBidirectional(
+				cbShadow.selectedProperty(), controller.app.screenPrepared.textShadowProperty());
+			Bindings.bindBidirectional(
+				cbTextWordWrap.selectedProperty(), controller.app.screenPrepared.textWordWrapProperty());
+		</fx:script>
+	</TitledPane>
+</VBox>

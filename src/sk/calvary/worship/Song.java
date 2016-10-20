@@ -63,8 +63,8 @@ public class Song implements Serializable, ObjectInputValidation {
 	}
 
 	private static Song loadSer(File f) throws IOException {
-		ObjectInputStream os = new PatchedObjectInputStream(new BufferedInputStream(
-				new FileInputStream(f)));
+		ObjectInputStream os = new PatchedObjectInputStream(
+				new BufferedInputStream(new FileInputStream(f)));
 		Song s;
 		try {
 			s = (Song) os.readObject();
@@ -78,8 +78,8 @@ public class Song implements Serializable, ObjectInputValidation {
 		return s;
 	}
 
-	private static Song loadTxt(File f) throws FileNotFoundException,
-			IOException {
+	private static Song loadTxt(File f)
+			throws FileNotFoundException, IOException {
 		Song s = new Song();
 		s.file = f;
 
@@ -159,6 +159,10 @@ public class Song implements Serializable, ObjectInputValidation {
 			r[i] = new AttributedString(verses.elementAt(i));
 		}
 		return r;
+	}
+
+	public String[] getVersesStrings() {
+		return verses.toArray(new String[0]);
 	}
 
 	public void setPlainText(String text) {
@@ -281,8 +285,8 @@ public class Song implements Serializable, ObjectInputValidation {
 		this.title2 = nazov2;
 	}
 
-	private void readObject(ObjectInputStream stream) throws IOException,
-			ClassNotFoundException {
+	private void readObject(ObjectInputStream stream)
+			throws IOException, ClassNotFoundException {
 		stream.defaultReadObject();
 		stream.registerValidation(this, 0);
 	}

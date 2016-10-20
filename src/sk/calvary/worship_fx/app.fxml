@@ -1,0 +1,85 @@
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import sk.calvary.worship_fx.*?>
+
+
+<BorderPane xmlns:fx="http://javafx.com/fxml">
+	<center>
+		<SplitPane>
+			<BorderPane>
+				<top>
+					<MenuBar>
+						<menus>
+							<Menu text="Subor">
+								<items>
+									<MenuItem text="Ulozit vsetko"/>
+								</items>
+							</Menu>
+							<Menu text="Obrazovky">
+								<items>
+									<MenuItem text="Ulozit vsetko"/>
+								</items>
+							</Menu>
+							<Menu text="Akcie">
+								<items>
+									<MenuItem text="Hladaj piesen"/>
+								</items>
+							</Menu>
+						</menus>
+					</MenuBar>
+				</top>
+				<center>
+					<TabPane>
+						<Tab text="Piesne + Pozadie" closable="false">
+							<SplitPane orientation="VERTICAL">
+								<StealerPane id="pane_songs">
+									<fx:include source="songspanel.fxml"/>
+								</StealerPane>
+								<StealerPane id="pane_pictures">
+									<fx:include source="songspanel.fxml"/>
+								</StealerPane>
+							</SplitPane>
+						</Tab>
+						<Tab text="Piesne" closable="false">
+						</Tab>
+						<Tab text="Pozadie" closable="false">
+						</Tab>
+						<Tab text="Nastavenia" closable="false">
+							<StealerPane id="pane_settings">
+								<fx:include source="settingspanel.fxml"/>
+							</StealerPane>
+						</Tab>
+					</TabPane>
+				</center>
+			</BorderPane>
+			<GridPane vgap="5">
+				<ScreenView fx:id="screenViewPrepared"
+					GridPane.rowIndex="0"
+					GridPane.hgrow="ALWAYS" 
+					GridPane.vgrow="ALWAYS" 
+					GridPane.fillWidth="true"					
+					GridPane.fillHeight="true"
+					style="-fx-background: transparent"
+				/>					
+				<BorderPane 
+					GridPane.rowIndex="1" GridPane.fillWidth="true" 
+					GridPane.hgrow="ALWAYS" 
+					style="-fx-background-color: #808080;-fx-padding:4">
+					<center>
+						<Button text="Na projektor!" />
+					</center>
+				</BorderPane>
+				<ScreenView fx:id="screenViewLive"
+					GridPane.rowIndex="2"
+					GridPane.hgrow="ALWAYS" 
+					GridPane.vgrow="ALWAYS" 
+					GridPane.fillWidth="true"					
+					GridPane.fillHeight="true"
+				/>
+			</GridPane>
+		</SplitPane>
+	</center>
+</BorderPane>

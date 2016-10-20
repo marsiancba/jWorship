@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<?import sk.calvary.worship_fx.*?>
+
+
+<?language javascript?>
+
+<GridPane xmlns:fx="http://javafx.com/fxml/1"
+	fx:controller="sk.calvary.worship_fx.SongsPanel" 
+	hgap="5" 
+	vgap="5"
+	style="-fx-padding: 5 0 0 0"
+	>
+	<HBox spacing="15"
+		alignment="CENTER_RIGHT"
+		styleClass="button-bar"
+		GridPane.rowIndex="0"
+		GridPane.columnSpan="2"
+		style="-fx-padding: 0 5 0 0"
+		>
+		<ToggleButton
+			style="-fx-graphic: url('/sk/calvary/worship/separateWithBlankLines.png');"
+		/>
+		<HBox spacing="5">
+		    <fx:define>
+		        <ToggleGroupValue fx:id="tgTextAreaPart"/>
+		    </fx:define>											
+			<ToggleButtonND toggleGroup="$tgTextAreaPart"
+				style="-fx-graphic: url('/sk/calvary/worship/textPartAll.png');">
+				<userData><Screen.TextAreaPart fx:constant="ALL"/></userData>
+			</ToggleButtonND>
+			<ToggleButtonND toggleGroup="$tgTextAreaPart"
+				style="-fx-graphic: url('/sk/calvary/worship/textPartTop.png');">
+				<userData><Screen.TextAreaPart fx:constant="TOP"/></userData>
+			</ToggleButtonND>
+			<ToggleButtonND toggleGroup="$tgTextAreaPart"
+				style="-fx-graphic: url('/sk/calvary/worship/textPartBottom.png');">
+				<userData><Screen.TextAreaPart fx:constant="BOTTOM"/></userData>
+			</ToggleButtonND>
+			<ToggleButtonND toggleGroup="$tgTextAreaPart"
+				style="-fx-graphic: url('/sk/calvary/worship/textPartTop2Thirds.png');">
+				<userData><Screen.TextAreaPart fx:constant="TOP_2THIRDS"/></userData>
+			</ToggleButtonND>
+		</HBox>
+		<HBox spacing="5">
+		    <fx:define>
+		        <ToggleGroupValue fx:id="tgTextAlign"/>
+		    </fx:define>											
+			<ToggleButtonND toggleGroup="$tgTextAlign"
+				style="-fx-graphic: url('/sk/calvary/worship/alignLeft.png');">
+				<userData><Screen.Align fx:constant="LEFT"/></userData>
+			</ToggleButtonND>
+			<ToggleButtonND toggleGroup="$tgTextAlign"
+				style="-fx-graphic: url('/sk/calvary/worship/alignCenter.png');">
+				<userData><Screen.Align fx:constant="CENTER"/></userData>
+			</ToggleButtonND>
+			<ToggleButtonND toggleGroup="$tgTextAlign"
+				style="-fx-graphic: url('/sk/calvary/worship/alignRight.png');">
+				<userData><Screen.Align fx:constant="RIGHT"/></userData>
+			</ToggleButtonND>
+		</HBox>
+		<ToggleButton
+			fx:id="btnShadow"
+			style="-fx-graphic: url('/sk/calvary/worship/shadow.png');"
+		/>
+		<ToggleButton
+			fx:id="cbTextWordWrap"
+			style="-fx-graphic: url('/sk/calvary/worship/wordWrap.png');"
+		/>
+		<fx:script>
+			var Bindings=javafx.beans.binding.Bindings;
+			var screen=controller.app.screenPrepared;
+			Bindings.bindBidirectional(
+				tgTextAreaPart.valueProperty(), screen.textAreaPartProperty());
+			Bindings.bindBidirectional(
+				tgTextAlign.valueProperty(), screen.textAlignProperty());
+			Bindings.bindBidirectional(
+				btnShadow.selectedProperty(), screen.textShadowProperty());
+			Bindings.bindBidirectional(
+				cbTextWordWrap.selectedProperty(), screen.textWordWrapProperty());
+		</fx:script>
+	</HBox>
+	<ListView fx:id="listSongs"
+		GridPane.rowIndex="1"
+		GridPane.columnIndex="0"
+		GridPane.hgrow="ALWAYS" 
+		GridPane.vgrow="ALWAYS"
+		items="$controller.app.songs" 
+		/>
+	<ListView fx:id="listVerses"
+		GridPane.rowIndex="1"
+		GridPane.columnIndex="1"
+		GridPane.hgrow="ALWAYS" 
+		GridPane.vgrow="ALWAYS" 
+		/>
+</GridPane>
