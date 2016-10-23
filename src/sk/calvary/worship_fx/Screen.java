@@ -5,7 +5,6 @@ package sk.calvary.worship_fx;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import javafx.beans.InvalidationListener;
@@ -17,15 +16,14 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.scene.layout.Region;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 
 public class Screen implements Observable {
 	double height = 0.75f; // width=1
 
 	double fontHeight = 0.1f;
-
-	double textHeight = 0.9f;
-
-	double textWidth = 0.9f;
 
 	private final BooleanProperty textShadow = new SimpleBooleanProperty(true);
 
@@ -70,15 +68,46 @@ public class Screen implements Observable {
 	}
 
 	public enum Align {
-		LEFT, CENTER, RIGHT;
+		LEFT(TextAlignment.LEFT), CENTER(TextAlignment.CENTER), RIGHT(
+				TextAlignment.RIGHT);
+
+		final TextAlignment fxAlign;
+
+		Align(TextAlignment fxAlign) {
+			this.fxAlign = fxAlign;
+		}
+
+		void align(Text t) {
+			t.setTextAlignment(fxAlign);
+		}
 	}
 
 	public enum TextAreaPart {
 		ALL, TOP, BOTTOM, TOP_2THIRDS;
+		void position(Region textParent, Region stack) {
+			double pad = 0.05;
+			double padTop = pad;
+			double padBottom = pad;
+			double padLeft = pad;
+			double padRight = pad;
+
+			if (this == TOP)
+				padBottom = 0.5;
+			if (this == BOTTOM)
+				padTop = 0.5;
+			if (this == TOP_2THIRDS)
+				padBottom = 1 / 3.0;
+
+			double width = stack.getWidth();
+			double height = stack.getHeight();
+			textParent.relocate(width * padLeft, height * padTop);
+			textParent.resize(width * (1 - padLeft - padRight),
+					height * (1 - padTop - padBottom));
+		}
 	}
 
 	private ObjectProperty<Align> textAlign = new SimpleObjectProperty<>(
-			Align.LEFT);
+			Align.CENTER);
 
 	public ObjectProperty<Align> textAlignProperty() {
 		return textAlign;
@@ -106,7 +135,7 @@ public class Screen implements Observable {
 	public List<Property<?>> listProperties() {
 		return Arrays.asList(new Property<?>[] { //
 				backgroundFillScreen, backgroundMedia, //
-				textAlign, textAreaPart, textFit, text, //
+				textAlign, textAreaPart, textFit, textWordWrap, text, //
 		});
 	}
 

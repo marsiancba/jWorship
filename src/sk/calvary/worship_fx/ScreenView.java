@@ -6,17 +6,19 @@ package sk.calvary.worship_fx;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
+import javafx.geometry.Bounds;
+import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
 public class ScreenView extends Pane implements InvalidationListener {
-	private StackPane stackPane;
+	private Pane stack;
 	private Screen screen;
+	private Pane textParent;
 	private Node background;
 	private Text text;
 
@@ -28,8 +30,12 @@ public class ScreenView extends Pane implements InvalidationListener {
 		setPrefWidth(100);
 		setPrefHeight(100);
 
-		stackPane = new StackPane();
-		stackPane.setStyle("-fx-background-color: #000000");
+		stack = new Pane();
+		stack.setStyle("-fx-background-color: #000000");
+		Utils.clipRegion(stack);
+
+		textParent = new Pane();
+		stack.getChildren().add(textParent);
 
 		/*
 		backgroundPane = new StackPane();
@@ -46,7 +52,7 @@ public class ScreenView extends Pane implements InvalidationListener {
 
 		// stackPane.getChildren().addAll(backgroundPane, text);
 
-		getChildren().add(stackPane);
+		getChildren().add(stack);
 	}
 
 	public void setScreen(Screen s) {
@@ -61,33 +67,89 @@ public class ScreenView extends Pane implements InvalidationListener {
 	void updateScreen() {
 		invalid = false;
 
-		if (text != null) {
-			stackPane.getChildren().remove(text);
-			text = null;
-		}
+		textParent.getChildren().clear();
 		if (background != null) {
-			stackPane.getChildren().remove(background);
+			stack.getChildren().remove(background);
 			background = null;
 		}
 
 		text = new Text(screen.getText());
 		text.setFill(Color.WHITE);
-		stackPane.getChildren().add(text);
+		text.setTextOrigin(VPos.TOP);
+		textParent.getChildren().add(text);
 		layoutChildren();
 	}
 
 	@Override
 	protected void layoutChildren() {
-		double width = Math.min(getWidth(), getHeight() / screen.height);
-		double height = width * screen.height;
-		stackPane.resize(width, height);
-		stackPane.relocate((getWidth() - width) / 2,
-				(getHeight() - height) / 2);
+		Utils.fitRegion(stack, this, screen.height, false);
+		Utils.fill(textParent, stack);
+
+		double width = stack.getWidth();
+		double height = stack.getHeight();
+
+		screen.textAreaPartProperty().get().position(textParent, stack);
 
 		if (text != null) {
-			text.resize(width * screen.textWidth, height * screen.textHeight);
+			text.setX(0);
+			text.setY(0);
+			boolean wrap = screen.textWordWrapProperty().get();
+			text.setWrappingWidth(wrap ? textParent.getWidth() : 0);
+			screen.textAlignProperty().get().align(text);
+
 			double fontSize = height * screen.fontHeight;
-			text.setFont(Font.font("Arial", fontSize));
+			double maxWidth = textParent.getWidth();
+			double maxHeight = textParent.getHeight();
+			for (int i = 0;; i++) {
+				text.setFont(Font.font("Arial", fontSize));
+				if (i >= 300)
+					break;
+
+				if (i == 0)
+					text.setStrokeWidth(0);
+				Bounds bounds = text.getBoundsInLocal();
+				double textWidth = bounds.getMaxX();
+				double textHeight = bounds.getMaxY();
+
+				boolean ok = true;
+				if (wrap) {
+					if (textWidth > 1.05 * maxWidth)
+						ok = false;
+				} else {
+					if (textWidth > 1.001 * maxWidth)
+						ok = false;
+				}
+				if (textHeight >= 1.001 * maxHeight)
+					ok = false;
+				if (ok)
+					break;
+
+				double shrink = 0.99;
+				if (textHeight > 2 * maxHeight)
+					shrink = Math.pow(maxHeight / textHeight, 0.333);
+				if (textWidth > 2 * maxWidth)
+					shrink = Math.pow(textWidth / textWidth, 0.333);
+
+				fontSize *= shrink;
+			}
+
+			if (!wrap) {
+				// musime to este potencialne posunut
+				double textWidth = text.getBoundsInLocal().getMaxX();
+				if (textWidth < maxWidth) {
+					switch (screen.textAlignProperty().get()) {
+					case CENTER:
+						text.xProperty().set((maxWidth - textWidth) / 2);
+						break;
+					case RIGHT:
+						text.xProperty().set(maxWidth - textWidth);
+						break;
+					case LEFT:
+						// nic
+					}
+				}
+			}
+
 			text.setStrokeWidth(fontSize * 0.01);
 
 			if (screen.isTextShadow()) {

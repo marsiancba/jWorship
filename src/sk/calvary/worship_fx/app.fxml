@@ -39,11 +39,12 @@
 									<fx:include source="songspanel.fxml"/>
 								</StealerPane>
 								<StealerPane id="pane_pictures">
-									<fx:include source="songspanel.fxml"/>
 								</StealerPane>
 							</SplitPane>
 						</Tab>
 						<Tab text="Piesne" closable="false">
+								<StealerPane id="pane_songs">
+								</StealerPane>
 						</Tab>
 						<Tab text="Pozadie" closable="false">
 						</Tab>
