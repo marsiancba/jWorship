@@ -20,12 +20,18 @@
 							</Menu>
 							<Menu text="Obrazovky">
 								<items>
-									<MenuItem text="Ulozit vsetko"/>
+									<MenuItem text="Projektor" onAction="#openProjector"/>
+									<MenuItem text="Tato obrazovka" onAction="#openProjectorHere"/>
+									<MenuItem text="Testovacie okno" onAction="#openProjectorWindow"/>
+									<SeparatorMenuItem/>
+									<MenuItem text="Zavriet" onAction="#closeProjector"/>
 								</items>
 							</Menu>
 							<Menu text="Akcie">
 								<items>
-									<MenuItem text="Hladaj piesen"/>
+									<MenuItem text="Na projektor!" accelerator="F5" onAction="#go"/>
+									<SeparatorMenuItem/>
+									<MenuItem text="Hladaj piesen" accelerator="Ctrl+F" onAction="#focusSearch"/>
 								</items>
 							</Menu>
 						</menus>
@@ -38,7 +44,8 @@
 								<StealerPane id="pane_songs">
 									<fx:include source="songspanel.fxml"/>
 								</StealerPane>
-								<StealerPane id="pane_pictures">
+								<StealerPane id="pane_backpic">
+									<fx:include source="backpicpanel.fxml"/>
 								</StealerPane>
 							</SplitPane>
 						</Tab>
@@ -47,6 +54,8 @@
 								</StealerPane>
 						</Tab>
 						<Tab text="Pozadie" closable="false">
+								<StealerPane id="pane_backpic">
+								</StealerPane>
 						</Tab>
 						<Tab text="Nastavenia" closable="false">
 							<StealerPane id="pane_settings">
@@ -70,7 +79,7 @@
 					GridPane.hgrow="ALWAYS" 
 					style="-fx-background-color: #808080;-fx-padding:4">
 					<center>
-						<Button text="Na projektor!" />
+						<Button text="Na projektor!" onAction="#go"/>
 					</center>
 				</BorderPane>
 				<ScreenView fx:id="screenViewLive"

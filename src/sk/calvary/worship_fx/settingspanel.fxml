@@ -14,23 +14,96 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.Label?>
+<?import java.lang.Double?>
 
-<VBox xmlns:fx="http://javafx.com/fxml/1"
-	spacing="5"
-	style="-fx-padding: 5 5 5 5"
-	fx:controller="sk.calvary.worship_fx.SettingsPanel" 
-	>
+<VBox xmlns:fx="http://javafx.com/fxml/1" spacing="5"
+	style="-fx-padding: 5 5 5 5" fx:controller="sk.calvary.worship_fx.SettingsPanel">
 	<TitledPane collapsible="false" text="Text">
-		<VBox style="-fx-padding: 5 5 5 5">
+		<VBox style="-fx-padding: 5 5 5 5" spacing="5">
 			<CheckBox text="Tien" fx:id="cbShadow"></CheckBox>
 			<CheckBox text="Zalamovat" fx:id="cbTextWordWrap"></CheckBox>
+			<HBox spacing="5" alignment="CENTER_LEFT">
+				<Label text="Velkost pisma:" />
+				<Slider min="0.02" max="0.3" prefWidth="200" fx:id="slTextFontHeight" />
+				<fx:define>
+					<ToggleGroupValue fx:id="tgTextFontHeight" />
+				</fx:define>
+				<ToggleButtonND toggleGroup="$tgTextFontHeight" text="10 %">
+					<userData>
+						<Double fx:value="0.1" />
+					</userData>
+				</ToggleButtonND>
+
+				<Label fx:id="lbTextFontHeight" />
+			</HBox>
 		</VBox>
-		<fx:script>
-			var Bindings=javafx.beans.binding.Bindings;
-			Bindings.bindBidirectional(
-				cbShadow.selectedProperty(), controller.app.screenPrepared.textShadowProperty());
-			Bindings.bindBidirectional(
-				cbTextWordWrap.selectedProperty(), controller.app.screenPrepared.textWordWrapProperty());
-		</fx:script>
 	</TitledPane>
+	<TitledPane collapsible="false" text="Aplikacia">
+		<VBox style="-fx-padding: 5 5 5 5" spacing="5">
+			<HBox spacing="5" alignment="CENTER_LEFT">
+				<Label text="pomer stran:" />
+				<Slider min="0.5" max="2.0" prefWidth="200" fx:id="slHeight" />
+				<fx:define>
+					<ToggleGroupValue fx:id="tgHeight" />
+				</fx:define>
+				<ToggleButtonND toggleGroup="$tgHeight" text="4:3">
+					<userData>
+						<Double fx:value="0.75" />
+					</userData>
+				</ToggleButtonND>
+				<ToggleButtonND toggleGroup="$tgHeight" text="16:9">
+					<userData>
+						<Double fx:value="0.5625" />
+					</userData>
+				</ToggleButtonND>
+				<ToggleButtonND toggleGroup="$tgHeight" text="8:7">
+					<userData>
+						<Double fx:value="0.875" />
+					</userData>
+				</ToggleButtonND>
+				<Label fx:id="lbHeight" />
+			</HBox>
+		</VBox>
+	</TitledPane>
+	<TitledPane collapsible="false" text="Aplikacia">
+		<VBox style="-fx-padding: 5 5 5 5" spacing="5">
+			<CheckBox text="pozadie vyplna celu obrazovku" fx:id="cbBackgroundFillScreen"></CheckBox>
+		</VBox>
+	</TitledPane>	
+	<fx:script>
+		var Bindings=javafx.beans.binding.Bindings;
+		var
+		screen=controller.app.screenPrepared;
+		Bindings.bindBidirectional(
+		cbShadow.selectedProperty(), screen.textShadowProperty());
+
+		Bindings.bindBidirectional(
+		cbTextWordWrap.selectedProperty(),
+		screen.textWordWrapProperty());
+
+		Bindings.bindBidirectional(
+		cbTextWordWrap.selectedProperty(), screen.textWordWrapProperty());
+
+		Bindings.bindBidirectional(
+		slTextFontHeight.valueProperty(),
+		screen.textFontHeightProperty());
+
+		Bindings.bindBidirectional(
+		tgTextFontHeight.valueProperty(),
+		screen.textFontHeightProperty());
+
+		Bindings.bindBidirectional(
+		cbBackgroundFillScreen.selectedProperty(),
+		screen.backgroundFillScreenProperty());
+
+		Bindings.bindBidirectional(
+		slHeight.valueProperty(),
+		screen.heightProperty());
+
+		Bindings.bindBidirectional(
+		tgHeight.valueProperty(),
+		screen.heightProperty());
+	</fx:script>
 </VBox>

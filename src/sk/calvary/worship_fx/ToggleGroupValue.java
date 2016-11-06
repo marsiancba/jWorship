@@ -27,6 +27,8 @@ public class ToggleGroupValue extends ToggleGroup {
 				if (v != null && v.equals(cv)) {
 					t.setSelected(true);
 					break;
+				} else {
+					t.setSelected(false);
 				}
 			}
 		});

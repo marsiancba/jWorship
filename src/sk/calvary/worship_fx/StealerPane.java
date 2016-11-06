@@ -43,7 +43,7 @@ public class StealerPane extends StackPane {
 			if (myTab.isSelected() && getChildren().size() == 0) {
 				for (Node p0 : myTab.getTabPane().lookupAll("#" + getId())) {
 					StealerPane p = (StealerPane) p0;
-					if (p.getChildren().size() > 0) {
+					if (p != this && p.getChildren().size() > 0) {
 						List<Node> orig = new ArrayList<>();
 						p.getChildren().forEach(orig::add);
 						orig.forEach(getChildren()::add);

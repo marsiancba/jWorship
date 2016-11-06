@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<?import sk.calvary.worship_fx.*?>
+
+
+<?language javascript?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.shape.Rectangle?>
+
+<GridPane xmlns:fx="http://javafx.com/fxml/1"
+	fx:controller="sk.calvary.worship_fx.BackPicPanel" 
+	hgap="5" 
+	vgap="5"
+	style="-fx-padding: 5 0 5 0"
+	>
+	<HBox spacing="15"
+		alignment="CENTER"
+		styleClass="button-bar"
+		GridPane.rowIndex="0"
+		GridPane.columnIndex="1"
+		GridPane.hgrow="ALWAYS"
+		style="-fx-padding: 0 5 0 0"
+		>
+		<ToggleButton fx:id="tgBackgroundFillScreen"
+			style="-fx-graphic: url('/sk/calvary/worship/backgroundFillScreen.png');"
+		/>
+		<HBox HBox.hgrow="ALWAYS"/>
+		<Button text="Prazdne pozadie" onAction="#empty" onMouseClicked="#emptyClick" />
+		<fx:script>
+			var Bindings=javafx.beans.binding.Bindings;
+			var screen=controller.app.screenPrepared;
+			Bindings.bindBidirectional(
+				tgBackgroundFillScreen.selectedProperty(), screen.backgroundFillScreenProperty());
+			/*Bindings.bindBidirectional(
+				tgTextAlign.valueProperty(), screen.textAlignProperty());
+			Bindings.bindBidirectional(
+				btnShadow.selectedProperty(), screen.textShadowProperty());
+			Bindings.bindBidirectional(
+				cbTextWordWrap.selectedProperty(), screen.textWordWrapProperty());*/
+		</fx:script>
+	</HBox>
+	<TreeView fx:id="treeDirs"
+		GridPane.rowIndex="0"
+		GridPane.rowSpan="2"
+		GridPane.columnIndex="0"
+		GridPane.hgrow="ALWAYS" 
+		GridPane.vgrow="ALWAYS"
+		/>
+	<ListView fx:id="listPics"
+		GridPane.rowIndex="1"
+		GridPane.columnIndex="1"
+		GridPane.hgrow="ALWAYS" 
+		GridPane.vgrow="ALWAYS" 
+		onMouseClicked="#picsClick"
+		/>
+	<HBox spacing="5"
+		GridPane.rowIndex="2"
+		GridPane.columnIndex="0"
+		GridPane.hgrow="ALWAYS" 
+	>
+	</HBox>
+	<HBox spacing="15"
+		alignment="CENTER_RIGHT"
+		GridPane.rowIndex="2"
+		GridPane.columnIndex="1"
+		GridPane.hgrow="ALWAYS" 
+		style="-fx-padding: 0 5 0 0"
+	>
+	</HBox>
+</GridPane>

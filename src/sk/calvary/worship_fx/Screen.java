@@ -5,14 +5,19 @@ package sk.calvary.worship_fx;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Predicate;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -21,11 +26,57 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
 public class Screen implements Observable {
-	double height = 0.75f; // width=1
+	enum ScreenPart {
+		ALL {
+			@Override
+			boolean contains(String property) {
+				return true;
+			}
+		},
+		TEXT {
+			@Override
+			boolean contains(String property) {
+				return property.startsWith("text");
+			}
+		},
+		BACKGROUND {
+			@Override
+			boolean contains(String property) {
+				return property.startsWith("back");
+			}
+		};
 
-	double fontHeight = 0.1f;
+		abstract boolean contains(String property);
 
-	private final BooleanProperty textShadow = new SimpleBooleanProperty(true);
+		boolean contains(Property<?> p) {
+			return contains(p.getName());
+		}
+	}
+
+	private final DoubleProperty height = new SimpleDoubleProperty(this,
+			"height", 0.75);// width=1
+
+	public DoubleProperty heightProperty() {
+		return height;
+	}
+
+	public double getHeight() {
+		return height.get();
+	}
+
+	private final DoubleProperty textFontHeight = new SimpleDoubleProperty(this,
+			"textFontHeight", 0.1);
+
+	public DoubleProperty textFontHeightProperty() {
+		return textFontHeight;
+	}
+
+	public double getTextFontHeight() {
+		return textFontHeight.get();
+	}
+
+	private final BooleanProperty textShadow = new SimpleBooleanProperty(this,
+			"textShadow", true);
 
 	public BooleanProperty textShadowProperty() {
 		return textShadow;
@@ -35,8 +86,8 @@ public class Screen implements Observable {
 		return textShadow.get();
 	}
 
-	private final BooleanProperty textWordWrap = new SimpleBooleanProperty(
-			true);
+	private final BooleanProperty textWordWrap = new SimpleBooleanProperty(this,
+			"textWordWrap", true);
 
 	public BooleanProperty textWordWrapProperty() {
 		return textWordWrap;
@@ -46,7 +97,8 @@ public class Screen implements Observable {
 		return textWordWrap.get();
 	}
 
-	private final BooleanProperty textFit = new SimpleBooleanProperty(true);
+	private final BooleanProperty textFit = new SimpleBooleanProperty(this,
+			"textFit", true);
 
 	public BooleanProperty textFitProperty() {
 		return textFit;
@@ -57,7 +109,7 @@ public class Screen implements Observable {
 	}
 
 	private final BooleanProperty backgroundFillScreen = new SimpleBooleanProperty(
-			true);
+			this, "backgroundFillScreen", true);
 
 	public BooleanProperty backgroundFillScreenProperty() {
 		return backgroundFillScreen;
@@ -106,27 +158,32 @@ public class Screen implements Observable {
 		}
 	}
 
-	private ObjectProperty<Align> textAlign = new SimpleObjectProperty<>(
-			Align.CENTER);
+	private final ObjectProperty<Align> textAlign = new SimpleObjectProperty<>(
+			this, "textAlign", Align.CENTER);
 
 	public ObjectProperty<Align> textAlignProperty() {
 		return textAlign;
 	}
 
-	private ObjectProperty<TextAreaPart> textAreaPart = new SimpleObjectProperty<>(
-			TextAreaPart.ALL);
+	private final ObjectProperty<TextAreaPart> textAreaPart = new SimpleObjectProperty<>(
+			this, "textAreaPart", TextAreaPart.ALL);
 
 	public ObjectProperty<TextAreaPart> textAreaPartProperty() {
 		return textAreaPart;
 	}
 
-	StringProperty backgroundMedia = new SimpleStringProperty("");
+	private final StringProperty backgroundMedia = new SimpleStringProperty(
+			this, "backgroundMedia", "");
 
 	public StringProperty backgroundMediaProperty() {
 		return backgroundMedia;
 	}
 
-	StringProperty text = new SimpleStringProperty("");
+	public String getBackgroundMedia() {
+		return backgroundMedia.get();
+	}
+
+	StringProperty text = new SimpleStringProperty(this, "text", "");
 
 	public StringProperty textProperty() {
 		return text;
@@ -135,8 +192,44 @@ public class Screen implements Observable {
 	public List<Property<?>> listProperties() {
 		return Arrays.asList(new Property<?>[] { //
 				backgroundFillScreen, backgroundMedia, //
-				textAlign, textAreaPart, textFit, textWordWrap, text, //
+				textAlign, textAreaPart, textFit, textWordWrap, text,
+				textShadow, textFontHeight, //
+				height, //
 		});
+	}
+
+	public Map<String, Property<?>> mapProperties() {
+		Map<String, Property<?>> map = new HashMap<>();
+		listProperties().forEach(p -> map.put(p.getName(), p));
+		return map;
+	}
+
+	public Property<?> getProperty(String name) {
+		return mapProperties().get(name);
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void copyFrom(Screen other, Predicate<String> filter) {
+		Map<String, Property<?>> other_map = other.mapProperties();
+		listProperties().forEach(p -> {
+			if (filter.test(p.getName()))
+				((Property) p).setValue(other_map.get(p.getName()).getValue());
+		});
+	}
+
+	public void copyFrom(Screen other) {
+		copyFrom(other, p -> true);
+	}
+
+	public boolean isDifferent(Screen other, ScreenPart part) {
+		return listProperties().stream().filter(part::contains).anyMatch(p -> !p
+				.getValue().equals(other.getProperty(p.getName()).getValue()));
+	}
+
+	public Screen clone() {
+		Screen s = new Screen();
+		s.copyFrom(this);
+		return s;
 	}
 
 	public void setText(String v) {

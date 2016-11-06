@@ -100,13 +100,23 @@
 		GridPane.columnIndex="1"
 		GridPane.hgrow="ALWAYS" 
 		GridPane.vgrow="ALWAYS" 
+		onMouseClicked="#versesClick"
 		/>
 	<HBox spacing="5"
 		GridPane.rowIndex="2"
 		GridPane.columnIndex="0"
 		GridPane.hgrow="ALWAYS" 
 	>
-		<TextField HBox.hgrow="ALWAYS" />
-		<Button text="123"/>
+		<TextField fx:id="tfSearch" id="tfSearch" HBox.hgrow="ALWAYS" />
+		<Button fx:id="tf123" text="123"/>
+	</HBox>
+	<HBox spacing="15"
+		alignment="CENTER_RIGHT"
+		GridPane.rowIndex="2"
+		GridPane.columnIndex="1"
+		GridPane.hgrow="ALWAYS" 
+		style="-fx-padding: 0 5 0 0"
+	>
+		<Button text="Prazdny text" onAction="#empty" onMouseClicked="#emptyClick" />
 	</HBox>
 </GridPane>

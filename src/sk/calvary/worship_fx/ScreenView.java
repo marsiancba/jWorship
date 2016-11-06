@@ -11,18 +11,40 @@ import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.Pane;
+import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaView;
+import javafx.scene.media.MediaPlayer.Status;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import sk.calvary.worship_fx.Screen.ScreenPart;
 
 public class ScreenView extends Pane implements InvalidationListener {
-	private Pane stack;
-	private Screen screen;
-	private Pane textParent;
+	private Screen screen = new Screen();
+	private final Screen lastScreen = new Screen();
+
+	private final Screen previousScreen = new Screen();
+
+	private final Pane stack;
+
+	private final Pane backgroundParent;
+	private final Pane textParent;
+
 	private Node background;
 	private Text text;
 
 	private boolean invalid = false;
+
+	App getApp() {
+		return App.app;
+	}
+
+	private final InvalidationListener IL = new InvalidationListener() {
+		@Override
+		public void invalidated(Observable observable) {
+			invalidate();
+		}
+	};
 
 	public ScreenView() {
 		setScreen(new Screen());
@@ -34,56 +56,78 @@ public class ScreenView extends Pane implements InvalidationListener {
 		stack.setStyle("-fx-background-color: #000000");
 		Utils.clipRegion(stack);
 
+		backgroundParent = new Pane();
+		stack.getChildren().add(backgroundParent);
+
 		textParent = new Pane();
 		stack.getChildren().add(textParent);
 
-		/*
-		backgroundPane = new StackPane();
-		
-		MediaPlayer mp = new MediaPlayer(new Media(
-				new File("pictures/test_240.mp4").toURI().toString()));
-		mp.setCycleCount(Integer.MAX_VALUE);
-		mp.setAutoPlay(true);
-		mp.setVolume(0);
-		MediaView mv = new MediaView(mp);
-		mv.setPreserveRatio(true);
-		backgroundPane.getChildren().add(mv);
-		*/
-
-		// stackPane.getChildren().addAll(backgroundPane, text);
-
 		getChildren().add(stack);
+
+		widthProperty().addListener(IL);
+		heightProperty().addListener(IL);
 	}
 
 	public void setScreen(Screen s) {
 		if (s == screen)
 			return;
-		if (screen != null)
-			screen.removeListener(this);
+		screen.removeListener(this);
+		previousScreen.copyFrom(screen);
+
 		screen = s;
 		screen.addListener(this);
+		invalidate();
 	}
 
 	void updateScreen() {
 		invalid = false;
 
-		textParent.getChildren().clear();
-		if (background != null) {
-			stack.getChildren().remove(background);
-			background = null;
+		if (screen.isDifferent(lastScreen, ScreenPart.BACKGROUND)) {
+			backgroundParent.getChildren().clear();
+
+			if (background != null) {
+				getApp().destroyBackgroundMediaNode(background);
+				background = null;
+			}
+
+			background = getApp()
+					.makeBackgroundMediaNode(screen.getBackgroundMedia());
+			if (background != null) {
+				backgroundParent.getChildren().add(background);
+				if (background instanceof MediaView) {
+					MediaView mv = (MediaView) background;
+					MediaPlayer mp = mv.getMediaPlayer();
+					if (mp.getStatus() == Status.UNKNOWN) {
+						mp.statusProperty().addListener(IL);
+					}
+				}
+			}
 		}
 
-		text = new Text(screen.getText());
-		text.setFill(Color.WHITE);
-		text.setTextOrigin(VPos.TOP);
-		textParent.getChildren().add(text);
-		layoutChildren();
+		if (screen.isDifferent(lastScreen, ScreenPart.TEXT)) {
+			textParent.getChildren().clear();
+
+			text = new Text(screen.getText());
+			text.setFill(Color.WHITE);
+			text.setTextOrigin(VPos.TOP);
+			textParent.getChildren().add(text);
+		}
+
+		lastScreen.copyFrom(screen);
+
+		updatePositions();
 	}
 
-	@Override
-	protected void layoutChildren() {
-		Utils.fitRegion(stack, this, screen.height, false);
+	protected void updatePositions() {
+		Utils.fitRegion(stack, this, screen.getHeight(), false);
+		Utils.fill(backgroundParent, stack);
 		Utils.fill(textParent, stack);
+
+		if (background != null) {
+			double aspect = Utils.getNodeAspectHeight(background);
+			Utils.fitNode(background, backgroundParent, aspect,
+					screen.isBackgroundFillScreen());
+		}
 
 		double width = stack.getWidth();
 		double height = stack.getHeight();
@@ -96,8 +140,9 @@ public class ScreenView extends Pane implements InvalidationListener {
 			boolean wrap = screen.textWordWrapProperty().get();
 			text.setWrappingWidth(wrap ? textParent.getWidth() : 0);
 			screen.textAlignProperty().get().align(text);
+			text.setEffect(null);
 
-			double fontSize = height * screen.fontHeight;
+			double fontSize = height * screen.getTextFontHeight();
 			double maxWidth = textParent.getWidth();
 			double maxHeight = textParent.getHeight();
 			for (int i = 0;; i++) {
@@ -158,8 +203,6 @@ public class ScreenView extends Pane implements InvalidationListener {
 				shadow.setOffsetY(fontSize * 0.05);
 				shadow.setRadius(fontSize * 0.1);
 				text.setEffect(shadow);
-			} else {
-				text.setEffect(null);
 			}
 		}
 
