@@ -26,7 +26,6 @@ import javax.swing.JFrame;
 
 import sk.calvary.misc.GraphicsTools;
 import sk.calvary.misc.ui.Dimension2DImpl;
-import sk.calvary.worship.jmf.Refresher;
 
 /**
  * @author marsian
@@ -35,11 +34,6 @@ import sk.calvary.worship.jmf.Refresher;
  *         Window - Preferences - Java - Code Generation - Code and Comments
  */
 public class ScreenViewSwing extends JComponent implements ScreenView, Runnable {
-	Refresher refresher = new Refresher() {
-		public void refresh() {
-			ScreenViewSwing.this.refresh();
-		}
-	};
 
 	private static final long serialVersionUID = 6735428947591824020L;
 
@@ -392,8 +386,8 @@ public class ScreenViewSwing extends JComponent implements ScreenView, Runnable 
 	}
 
 	public void newMediaFrame(String media) {
-		if (media.equals(screen.getBackgroundMedia()))
-			refresher.newFrame();
+		//if (media.equals(screen.getBackgroundMedia()))
+		//	refresher.newFrame();
 	}
 
 	private void refresh() {
