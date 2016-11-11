@@ -82,6 +82,10 @@ public class Utils {
 					aspect = m.getHeight() / (double) m.getWidth();
 			}
 		}
+		if (n instanceof VLCMediaView) {
+			VLCMediaView mv = (VLCMediaView) n;
+			return mv.getAspectHeight();
+		}
 
 		return aspect;
 	}

@@ -10,12 +10,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import javax.json.Json;
-
-import com.sun.corba.se.impl.protocol.giopmsgheaders.MessageBase;
-
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -25,18 +22,21 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.TextField;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaPlayer.Status;
 import javafx.scene.media.MediaView;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import sk.calvary.worship.Song;
 import sk.calvary.worship_fx.Screen.ScreenPart;
-import sun.awt.Win32ColorModel24;
+import uk.co.caprica.vlcj.discovery.NativeDiscovery;
 
 public class App extends Application implements Initializable {
 
@@ -102,7 +102,15 @@ public class App extends Application implements Initializable {
 		loadSongs();
 	}
 
+	@Override
+	public void stop() throws Exception {
+		for (Node n : mediaNode2media.keySet().toArray(new Node[0])) {
+			destroyBackgroundMediaNode(n);
+		}
+	}
+
 	public static void main(String[] args) {
+		System.out.println("VLC found=" + new NativeDiscovery().discover());
 		launch(args);
 	}
 
@@ -166,6 +174,7 @@ public class App extends Application implements Initializable {
 
 	final Map<Node, String> mediaNode2media = new HashMap<>();
 	final Map<String, MediaPlayer> media2mediaPlayer = new HashMap<>();
+	final Map<String, VLCMediaPlayer> media2vlcMediaPlayer = new HashMap<>();
 
 	public Node makeBackgroundMediaNode(String media) {
 		if (media == null)
@@ -175,31 +184,60 @@ public class App extends Application implements Initializable {
 		File f = new File(media);
 		if (f.exists() && f.isFile()) {
 			String ext = BackPicPanel.getFileExtension(f).toLowerCase();
-			switch (ext) {
-			case "jpg":
-			case "jpeg":
-			case "png":
-				try {
-					return new ImageView(
-							new Image(f.toURI().toURL().toExternalForm()));
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
+			try {
+				switch (ext) {
+				case "jpg":
+				case "jpeg":
+				case "png":
+					try {
+						return new ImageView(
+								new Image(f.toURI().toURL().toExternalForm()));
+					} catch (MalformedURLException e) {
+						e.printStackTrace();
+					}
+				case "mp4X": {
+					MediaPlayer mp = media2mediaPlayer.get(media);
+					if (mp == null) {
+						mp = new MediaPlayer(
+								new Media(new File(media).toURI().toString()));
+						mp.statusProperty().addListener(
+								(ObservableValue<? extends Status> a, Status b,
+										Status st) -> {
+									System.out.println(media + " -> " + st);
+								});
+						mp.setCycleCount(Integer.MAX_VALUE);
+						mp.setAutoPlay(true);
+						mp.setVolume(0);
+						media2mediaPlayer.put(media, mp);
+					}
+					MediaView mv = new MediaView(mp);
+					mv.setPreserveRatio(true);
+					mediaNode2media.put(mv, media);
+					return mv;
 				}
-			case "mp4":
-				MediaPlayer mp = media2mediaPlayer.get(media);
-				if (mp == null) {
-					mp = new MediaPlayer(
-							new Media(new File("pictures/test_240.mp4").toURI()
-									.toString()));
-					mp.setCycleCount(Integer.MAX_VALUE);
-					mp.setAutoPlay(true);
-					mp.setVolume(0);
-					media2mediaPlayer.put(media, mp);
+				case "mp4":
+				case "mpg": {
+					VLCMediaPlayer mp = media2vlcMediaPlayer.get(media);
+					if (mp == null) {
+						mp = new VLCMediaPlayer(new File(media));
+						mp.statusProperty().addListener(
+								(ObservableValue<? extends Status> a, Status b,
+										Status st) -> {
+									System.out.println(media + " -> " + st);
+								});
+						media2vlcMediaPlayer.put(media, mp);
+						mp.setVolume(0);
+					}
+					VLCMediaView mv = new VLCMediaView(mp);
+					mediaNode2media.put(mv, media);
+					return mv;
 				}
-				MediaView mv = new MediaView(mp);
-				mv.setPreserveRatio(true);
-				mediaNode2media.put(mv, media);
-				return mv;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				Text text = new Text(e.toString());
+				text.setFill(Color.WHITE);
+				return text;
 			}
 		}
 		return null;
@@ -225,6 +263,17 @@ public class App extends Application implements Initializable {
 				r.run();
 			}
 			// mv.setMediaPlayer(null);
+		}
+
+		if (n instanceof VLCMediaView) {
+			VLCMediaView mv = (VLCMediaView) n;
+			mv.dispose();
+
+			if (!mediaNode2media.containsValue(media)) {
+				VLCMediaPlayer mp = media2vlcMediaPlayer.get(media);
+				mp.dispose();
+				media2mediaPlayer.remove(media);
+			}
 		}
 	}
 

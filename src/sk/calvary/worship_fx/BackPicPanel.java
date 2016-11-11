@@ -50,7 +50,9 @@ public class BackPicPanel implements Initializable {
 			go();
 		}
 	}
-	@FXML public void picsClick(MouseEvent event) {
+
+	@FXML
+	public void picsClick(MouseEvent event) {
 		if (event.getClickCount() == 2) {
 			go();
 		}
@@ -61,7 +63,7 @@ public class BackPicPanel implements Initializable {
 	}
 
 	static final Set<String> validExtensions = new HashSet<String>(
-			Arrays.asList(new String[] { "png", "jpg", "jpeg", "mp4" }));
+			Arrays.asList(new String[] { "png", "jpg", "jpeg", "mp4", "mpg" }));
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {

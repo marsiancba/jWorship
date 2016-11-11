@@ -3,6 +3,7 @@
  */
 package sk.calvary.worship_fx;
 
+import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
@@ -12,11 +13,12 @@ import javafx.scene.Node;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.Pane;
 import javafx.scene.media.MediaPlayer;
-import javafx.scene.media.MediaView;
 import javafx.scene.media.MediaPlayer.Status;
+import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.util.Duration;
 import sk.calvary.worship_fx.Screen.ScreenPart;
 
 public class ScreenView extends Pane implements InvalidationListener {
@@ -27,11 +29,15 @@ public class ScreenView extends Pane implements InvalidationListener {
 
 	private final Pane stack;
 
-	private final Pane backgroundParent;
-	private final Pane textParent;
+	private Pane backgroundParent;
+	private Pane textParent;
 
 	private Node background;
 	private Text text;
+
+	private Pane transitionTextParent;
+	private Pane transitionBackgroundParent;
+	private Node transitionBackground;
 
 	private boolean invalid = false;
 
@@ -57,10 +63,8 @@ public class ScreenView extends Pane implements InvalidationListener {
 		Utils.clipRegion(stack);
 
 		backgroundParent = new Pane();
-		stack.getChildren().add(backgroundParent);
-
 		textParent = new Pane();
-		stack.getChildren().add(textParent);
+		stack.getChildren().addAll(backgroundParent, textParent);
 
 		getChildren().add(stack);
 
@@ -82,13 +86,25 @@ public class ScreenView extends Pane implements InvalidationListener {
 	void updateScreen() {
 		invalid = false;
 
-		if (screen.isDifferent(lastScreen, ScreenPart.BACKGROUND)) {
-			backgroundParent.getChildren().clear();
+		clearTransition();
 
+		if (screen.isDifferent(lastScreen, ScreenPart.BACKGROUND)) {
+			transitionBackgroundParent = backgroundParent;
+			transitionBackground = background;
+
+			backgroundParent = new Pane();
+			background = null;
+			stack.getChildren().add(
+					stack.getChildren().indexOf(transitionBackgroundParent),
+					backgroundParent);
+
+			/*
+			backgroundParent.getChildren().clear();
+			
 			if (background != null) {
 				getApp().destroyBackgroundMediaNode(background);
 				background = null;
-			}
+			}*/
 
 			background = getApp()
 					.makeBackgroundMediaNode(screen.getBackgroundMedia());
@@ -101,11 +117,23 @@ public class ScreenView extends Pane implements InvalidationListener {
 						mp.statusProperty().addListener(IL);
 					}
 				}
+				if (background instanceof VLCMediaView) {
+					VLCMediaView mv = (VLCMediaView) background;
+					VLCMediaPlayer mp = mv.getMediaPlayer();
+					if (mp.getStatus() == Status.UNKNOWN) {
+						mp.statusProperty().addListener(IL);
+					}
+				}
 			}
 		}
 
 		if (screen.isDifferent(lastScreen, ScreenPart.TEXT)) {
-			textParent.getChildren().clear();
+			transitionTextParent = textParent;
+			textParent = new Pane();
+			stack.getChildren().add(
+					stack.getChildren().indexOf(transitionTextParent),
+					textParent);
+			// textParent.getChildren().clear();
 
 			text = new Text(screen.getText());
 			text.setFill(Color.WHITE);
@@ -116,6 +144,8 @@ public class ScreenView extends Pane implements InvalidationListener {
 		lastScreen.copyFrom(screen);
 
 		updatePositions();
+
+		startTransition();
 	}
 
 	protected void updatePositions() {
@@ -206,6 +236,54 @@ public class ScreenView extends Pane implements InvalidationListener {
 			}
 		}
 
+	}
+
+	void clearTransition() {
+		if (transitionBackground != null) {
+			getApp().destroyBackgroundMediaNode(transitionBackground);
+			transitionBackground = null;
+		}
+		if (transitionBackgroundParent != null) {
+			stack.getChildren().remove(transitionBackgroundParent);
+			transitionBackgroundParent = null;
+		}
+		if (transitionTextParent != null) {
+			stack.getChildren().remove(transitionTextParent);
+			transitionTextParent = null;
+		}
+
+		backgroundParent.setOpacity(1);
+		textParent.setOpacity(1);
+	}
+
+	void makeTransition(Node from, Node to) {
+		FadeTransition trFrom = new FadeTransition(Duration.seconds(1), from);
+		trFrom.setFromValue(1);
+		trFrom.setToValue(0);
+
+		FadeTransition trTo = new FadeTransition(Duration.seconds(1), to);
+		trTo.setFromValue(0);
+		trTo.setToValue(1);
+
+		trTo.setOnFinished(e -> {
+			clearTransition();
+		});
+
+		trFrom.play();
+		trTo.play();
+	}
+
+	void startTransition() {
+		if (this == getApp().screenViewPrepared) {
+			// tu nerobime transition
+			clearTransition();
+			return;
+		}
+		if (transitionTextParent != null) {
+			makeTransition(transitionTextParent, textParent);
+		}
+		if (transitionBackgroundParent != null)
+			makeTransition(transitionBackgroundParent, backgroundParent);
 	}
 
 	@Override
