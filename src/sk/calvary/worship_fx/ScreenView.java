@@ -12,9 +12,6 @@ import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.Pane;
-import javafx.scene.media.MediaPlayer;
-import javafx.scene.media.MediaPlayer.Status;
-import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -89,6 +86,9 @@ public class ScreenView extends Pane implements InvalidationListener {
 		clearTransition();
 
 		if (screen.isDifferent(lastScreen, ScreenPart.BACKGROUND)) {
+			if (background != null) {
+				Utils.nodeAspectHeight(background).removeListener(IL);
+			}
 			transitionBackgroundParent = backgroundParent;
 			transitionBackground = background;
 
@@ -110,20 +110,7 @@ public class ScreenView extends Pane implements InvalidationListener {
 					.makeBackgroundMediaNode(screen.getBackgroundMedia());
 			if (background != null) {
 				backgroundParent.getChildren().add(background);
-				if (background instanceof MediaView) {
-					MediaView mv = (MediaView) background;
-					MediaPlayer mp = mv.getMediaPlayer();
-					if (mp.getStatus() == Status.UNKNOWN) {
-						mp.statusProperty().addListener(IL);
-					}
-				}
-				if (background instanceof VLCMediaView) {
-					VLCMediaView mv = (VLCMediaView) background;
-					VLCMediaPlayer mp = mv.getMediaPlayer();
-					if (mp.getStatus() == Status.UNKNOWN) {
-						mp.statusProperty().addListener(IL);
-					}
-				}
+				Utils.nodeAspectHeight(background).addListener(IL);
 			}
 		}
 
@@ -154,7 +141,7 @@ public class ScreenView extends Pane implements InvalidationListener {
 		Utils.fill(textParent, stack);
 
 		if (background != null) {
-			double aspect = Utils.getNodeAspectHeight(background);
+			double aspect = Utils.nodeAspectHeight(background).get();
 			Utils.fitNode(background, backgroundParent, aspect,
 					screen.isBackgroundFillScreen());
 		}

@@ -36,6 +36,8 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import sk.calvary.worship.Song;
 import sk.calvary.worship_fx.Screen.ScreenPart;
+import sk.calvary.worship_fx.vlc.VLCMediaPlayer;
+import sk.calvary.worship_fx.vlc.VLCMediaView;
 import uk.co.caprica.vlcj.discovery.NativeDiscovery;
 
 public class App extends Application implements Initializable {
@@ -272,7 +274,7 @@ public class App extends Application implements Initializable {
 			if (!mediaNode2media.containsValue(media)) {
 				VLCMediaPlayer mp = media2vlcMediaPlayer.get(media);
 				mp.dispose();
-				media2mediaPlayer.remove(media);
+				media2vlcMediaPlayer.remove(media);
 			}
 		}
 	}

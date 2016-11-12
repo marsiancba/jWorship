@@ -1,7 +1,7 @@
 /*
  * Created on Nov 10, 2016
  */
-package sk.calvary.worship_fx;
+package sk.calvary.worship_fx.vlc;
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -16,6 +16,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.image.PixelFormat;
+import javafx.scene.image.WritableImage;
 import javafx.scene.image.WritablePixelFormat;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaPlayer.Status;
@@ -36,11 +37,22 @@ public class VLCMediaPlayer {
 	private boolean dispose = false;
 	private boolean hasFrame = false;
 
+	/**
+	 * There are 2 modes of drawing implemented:<br>
+	 * VLC->Canvas<br>
+	 * VLC->Image->ImageView<br>
+	 * 
+	 * Image mode seems to be faster, especially when there are multiple views.
+	 */
+	final boolean useImage = true;
+
 	List<VLCMediaView> views = new ArrayList<>();
 
 	int width;
-
 	int height;
+	double aspectHeight = 1;
+
+	WritableImage image;
 
 	private RV32BufferFormat bufferFormat;
 
@@ -72,6 +84,7 @@ public class VLCMediaPlayer {
 			dmpc = new DirectMediaPlayerComponent((w, h) -> {
 				width = w;
 				height = h;
+				aspectHeight = h / (double) w;
 				System.out.println(media + " -> " + w + " " + h);
 				bufferFormat = new RV32BufferFormat(w, h);
 				return bufferFormat;
@@ -84,6 +97,7 @@ public class VLCMediaPlayer {
 			};
 			dmp = dmpc.getMediaPlayer();
 			dmp.playMedia(media.getAbsolutePath());
+			dmp.setVolume(mpVolume);
 			dmp.setRepeat(true);
 
 			Platform.runLater(() -> {
@@ -108,15 +122,21 @@ public class VLCMediaPlayer {
 			return;
 		Memory[] nativeBuffers = dmp.lock();
 		if (nativeBuffers != null) {
-			// FIXME there may be more efficient ways to do this...
-			// Since this is now being called by a specific rendering time,
-			// independent of the native video callbacks being
-			// invoked, some more defensive conditional checks are needed
 			Memory nativeBuffer = nativeBuffers[0];
 			if (nativeBuffer != null) {
-				System.out.println(dmpc.getMediaPlayer().getTime());
+				// System.out.println(dmpc.getMediaPlayer().getTime());
 				ByteBuffer byteBuffer = nativeBuffer.getByteBuffer(0,
 						nativeBuffer.size());
+				if (useImage) {
+					if (image == null || image.getWidth() != width
+							|| image.getHeight() != height) {
+						image = new WritableImage(width, height);
+						views.forEach(mv -> {
+							mv.setImage(image);
+							mv.aspectHeight.set(aspectHeight);
+						});
+					}
+				}
 				if (bufferFormat != null && bufferFormat.getWidth() > 0
 						&& bufferFormat.getHeight() > 0) {
 					if (status.get() == Status.UNKNOWN) {
@@ -124,20 +144,30 @@ public class VLCMediaPlayer {
 					} else {
 						status.set(Status.PLAYING);
 					}
-					views.forEach(mv -> {
-						Canvas c = mv.canvas;
-						if (c.getWidth() != width || c.getHeight() != height) {
-							System.out.println(
-									"MUU " + c.getWidth() + " -> " + width);
-							c.setWidth(width);
-							c.setHeight(height);
-							mv.fitCanvas();
-						}
-						c.getGraphicsContext2D().getPixelWriter().setPixels(0,
-								0, bufferFormat.getWidth(),
+					if (useImage) {
+						image.getPixelWriter().setPixels(0, 0,
+								bufferFormat.getWidth(),
 								bufferFormat.getHeight(), pixelFormat,
 								byteBuffer, bufferFormat.getPitches()[0]);
-					});
+					} else {
+						views.forEach(mv -> {
+							Canvas c = mv.canvas;
+							if (c.getWidth() != width
+									|| c.getHeight() != height) {
+								// System.out.println( "MUU " + c.getWidth() + "
+								// ->
+								// " + width);
+								c.setWidth(width);
+								c.setHeight(height);
+								mv.aspectHeight.set(aspectHeight);
+								mv.fitChild();
+							}
+							c.getGraphicsContext2D().getPixelWriter().setPixels(
+									0, 0, bufferFormat.getWidth(),
+									bufferFormat.getHeight(), pixelFormat,
+									byteBuffer, bufferFormat.getPitches()[0]);
+						});
+					}
 				}
 			}
 		}
@@ -154,8 +184,11 @@ public class VLCMediaPlayer {
 		}
 	}
 
+	private int mpVolume = 100;
+
 	public void setVolume(double volume) {
+		mpVolume = (int) Math.round(100 * volume);
 		if (dmp != null)
-			dmp.setVolume((int) Math.round(100 * volume));
+			dmp.setVolume(mpVolume);
 	}
 }

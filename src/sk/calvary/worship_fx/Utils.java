@@ -3,6 +3,12 @@
  */
 package sk.calvary.worship_fx;
 
+import java.util.Map;
+import java.util.WeakHashMap;
+
+import javafx.beans.binding.DoubleBinding;
+import javafx.beans.binding.DoubleExpression;
+import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -11,6 +17,7 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.shape.Rectangle;
+import sk.calvary.worship_fx.vlc.VLCMediaView;
 
 public class Utils {
 
@@ -66,7 +73,35 @@ public class Utils {
 
 	}
 
-	public static double getNodeAspectHeight(Node n) {
+	private static final Map<Node, DoubleExpression> nodeAspectHeightCache = new WeakHashMap<>();
+
+	public static DoubleExpression nodeAspectHeight(Node n) {
+		DoubleExpression res = nodeAspectHeightCache.get(n);
+		if (res == null) {
+			if (n instanceof ImageView) {
+				DoubleBinding b = new DoubleBinding() {
+					@Override
+					protected double computeValue() {
+						Image i = ((ImageView) n).getImage();
+						if (i.getWidth() > 0)
+							return i.getHeight() / i.getWidth();
+						else
+							return 1;
+					}
+				};
+				res = b;
+			} else if (n instanceof VLCMediaView) {
+				VLCMediaView mv = (VLCMediaView) n;
+				res = mv.aspectHeightProperty();
+			} else {
+				res = new ReadOnlyDoubleWrapper(1);
+			}
+			nodeAspectHeightCache.put(n, res);
+		}
+		return res;
+	}
+
+	/*public static double getNodeAspectHeight(Node n) {
 		double aspect = 1;
 		if (n instanceof ImageView) {
 			Image i = ((ImageView) n).getImage();
@@ -84,11 +119,11 @@ public class Utils {
 		}
 		if (n instanceof VLCMediaView) {
 			VLCMediaView mv = (VLCMediaView) n;
-			return mv.getAspectHeight();
+			return mv.aspectHeightProperty().get();
 		}
-
+	
 		return aspect;
-	}
+	}*/
 
 	public static void clipRegion(Region region) {
 		Rectangle clipRectangle = new Rectangle();
