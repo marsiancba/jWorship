@@ -3,18 +3,25 @@
  */
 package sk.calvary.worship_fx;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.attribute.DosFileAttributeView;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
 
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.binding.DoubleExpression;
 import javafx.beans.property.ReadOnlyDoubleWrapper;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Region;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.shape.Rectangle;
 import sk.calvary.worship_fx.vlc.VLCMediaView;
@@ -133,5 +140,92 @@ public class Utils {
 					clipRectangle.setWidth(newValue.getWidth());
 					clipRectangle.setHeight(newValue.getHeight());
 				});
+	}
+
+	public static String getFileExtension(File fi) {
+		String n = fi.getName();
+		int i = n.lastIndexOf('.');
+		if (i >= 0)
+			return n.substring(i + 1);
+		return "";
+	}
+
+	static final Set<String> imageExtensions = new HashSet<String>(
+			Arrays.asList(new String[] { "png", "jpg", "jpeg", }));
+
+	public static boolean isImageFile(File f) {
+		return imageExtensions.contains(getFileExtension(f).toLowerCase());
+	}
+
+	static final Set<String> videExtensions = new HashSet<String>(
+			Arrays.asList(new String[] { "mp4", "mpg", "webm" }));
+
+	public static boolean isVideoFile(File f) {
+		return videExtensions.contains(getFileExtension(f).toLowerCase());
+	}
+
+	public static BufferedImage fromFXImage_fixed(Image myJavaFXImage) {
+		// http://stackoverflow.com/questions/19548363/image-saved-in-javafx-as-jpg-is-pink-toned
+
+		BufferedImage image = SwingFXUtils.fromFXImage(myJavaFXImage, null);
+
+		// Remove alpha-channel from buffered image:
+		BufferedImage imageRGB = new BufferedImage(image.getWidth(),
+				image.getHeight(), BufferedImage.OPAQUE);
+
+		Graphics2D graphics = imageRGB.createGraphics();
+
+		graphics.drawImage(image, 0, 0, null);
+
+		graphics.dispose();
+		return imageRGB;
+	}
+
+	public static void setFileHidden(File f, boolean hidden) {
+		try {
+			DosFileAttributeView dfav = Files.getFileAttributeView(f.toPath(),
+					DosFileAttributeView.class);
+			if (dfav != null)
+				dfav.setHidden(hidden);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	static final String diakCharsSmall = //
+			"áäčďéíľĺňôóŕřšťúýžąćęłńóśżź";
+
+	static final String diakCharsSmallNoDiak = //
+			"aacdeillnoorrstuyzacelnoszz";
+
+	static final String diakChars = diakCharsSmall
+			+ diakCharsSmall.toUpperCase();
+
+	static final String diakCharsNoDiak = diakCharsSmallNoDiak
+			+ diakCharsSmallNoDiak.toUpperCase();
+
+	public static char undiak(char c) {
+		int i = diakChars.indexOf(c);
+		if (i < 0)
+			return c;
+		return diakCharsNoDiak.charAt(i);
+	}
+
+	public static String undiak(String s) {
+		StringBuffer sb = new StringBuffer();
+		int len = s.length();
+		for (int i = 0; i < len; i++) {
+			sb.append(undiak(s.charAt(i)));
+		}
+		return sb.toString();
+	}
+
+	public static boolean isSimpleLetter(char c) {
+		return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+	}
+
+	public static boolean isSimpleLetterOrDigit(char c) {
+		return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
+				|| (c >= '0' && c <= '9');
 	}
 }

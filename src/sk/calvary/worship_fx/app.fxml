@@ -15,7 +15,7 @@
 						<menus>
 							<Menu text="Subor">
 								<items>
-									<MenuItem text="Ulozit vsetko"/>
+									<MenuItem text="Ulozit vsetko" onAction="#saveAll"/>
 								</items>
 							</Menu>
 							<Menu text="Obrazovky">

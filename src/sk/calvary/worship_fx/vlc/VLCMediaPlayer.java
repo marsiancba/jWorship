@@ -7,6 +7,8 @@ import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import com.sun.jna.Memory;
 
@@ -15,12 +17,15 @@ import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.image.Image;
 import javafx.scene.image.PixelFormat;
 import javafx.scene.image.WritableImage;
 import javafx.scene.image.WritablePixelFormat;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaPlayer.Status;
+import javafx.util.Duration;
 import uk.co.caprica.vlcj.component.DirectMediaPlayerComponent;
+import uk.co.caprica.vlcj.discovery.NativeDiscovery;
 import uk.co.caprica.vlcj.player.direct.BufferFormat;
 import uk.co.caprica.vlcj.player.direct.DirectMediaPlayer;
 import uk.co.caprica.vlcj.player.direct.format.RV32BufferFormat;
@@ -149,6 +154,9 @@ public class VLCMediaPlayer {
 								bufferFormat.getWidth(),
 								bufferFormat.getHeight(), pixelFormat,
 								byteBuffer, bufferFormat.getPitches()[0]);
+						if (onFrame != null) {
+							onFrame.accept(() -> image);
+						}
 					} else {
 						views.forEach(mv -> {
 							Canvas c = mv.canvas;
@@ -190,5 +198,27 @@ public class VLCMediaPlayer {
 		mpVolume = (int) Math.round(100 * volume);
 		if (dmp != null)
 			dmp.setVolume(mpVolume);
+	}
+
+	static {
+		System.out.println("VLC found=" + new NativeDiscovery().discover());
+	}
+
+	Consumer<Supplier<Image>> onFrame;
+
+	public void setOnFrame(Consumer<Supplier<Image>> c) {
+		onFrame = c;
+	}
+
+	public final Duration getCurrentTime() {
+		if (dispose || dmp == null)
+			return Duration.ZERO;
+		return Duration.millis(dmp.getTime());
+	}
+
+	public final Duration getCycleDuration() {
+		if (dispose || dmp == null)
+			return Duration.UNKNOWN;
+		return Duration.millis(dmp.getLength());
 	}
 }

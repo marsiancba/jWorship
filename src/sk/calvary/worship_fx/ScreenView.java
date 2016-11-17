@@ -244,20 +244,28 @@ public class ScreenView extends Pane implements InvalidationListener {
 	}
 
 	void makeTransition(Node from, Node to) {
-		FadeTransition trFrom = new FadeTransition(Duration.seconds(1), from);
-		trFrom.setFromValue(1);
-		trFrom.setToValue(0);
+		double duration = getApp().transitionDurationProperty().get();
 
-		FadeTransition trTo = new FadeTransition(Duration.seconds(1), to);
-		trTo.setFromValue(0);
-		trTo.setToValue(1);
+		if (duration > 0) {
+			FadeTransition trFrom = new FadeTransition(
+					Duration.seconds(duration), from);
+			trFrom.setFromValue(1);
+			trFrom.setToValue(0);
 
-		trTo.setOnFinished(e -> {
+			FadeTransition trTo = new FadeTransition(Duration.seconds(duration),
+					to);
+			trTo.setFromValue(0);
+			trTo.setToValue(1);
+
+			trTo.setOnFinished(e -> {
+				clearTransition();
+			});
+
+			trFrom.play();
+			trTo.play();
+		} else {
 			clearTransition();
-		});
-
-		trFrom.play();
-		trTo.play();
+		}
 	}
 
 	void startTransition() {

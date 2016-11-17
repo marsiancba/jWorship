@@ -5,13 +5,8 @@ package sk.calvary.worship_fx;
 
 import java.io.File;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.ResourceBundle;
-import java.util.Set;
 
-import javafx.beans.InvalidationListener;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -19,14 +14,14 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
 import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.control.TreeView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.ListView;
 
 public class BackPicPanel implements Initializable {
 	public App getApp() {
@@ -34,14 +29,19 @@ public class BackPicPanel implements Initializable {
 	}
 
 	@FXML
-	ListView<File> listPics;
+	ImagesListView listPics;
 	@FXML
-	TreeView<File> treeDirs;
-	private ReadOnlyObjectProperty<TreeItem<File>> selectedDir;
+	TreeView<String> treeDirs;
+	private ReadOnlyObjectProperty<TreeItem<String>> selectedDir;
+	@FXML
+	TabPane tabPane;
+	@FXML
+	ListView<MediaHistoryItem> listHistoria;
 
 	@FXML
 	public void empty() {
 		listPics.getSelectionModel().clearSelection();
+		getApp().getScreenPrepared().backgroundMediaProperty().set("");
 	}
 
 	@FXML
@@ -62,57 +62,81 @@ public class BackPicPanel implements Initializable {
 		getApp().go(Screen.ScreenPart.BACKGROUND);
 	}
 
-	static final Set<String> validExtensions = new HashSet<String>(
-			Arrays.asList(new String[] { "png", "jpg", "jpeg", "mp4", "mpg" }));
-
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
-		MyTreeItem root = new MyTreeItem(new File("pictures"));
+		MyTreeItem root = new MyTreeItem("");
 		treeDirs.setRoot(root);
 		treeDirs.setCellFactory(td -> new MyTreeCell());
 
 		selectedDir = treeDirs.getSelectionModel().selectedItemProperty();
 
-		selectedDir.addListener(x -> {
-			ObservableList<File> images = FXCollections.observableArrayList();
-			for (File fi : selectedDir.get().getValue().listFiles()) {
-				if (!fi.isFile())
-					continue;
-				if (validExtensions
-						.contains(getFileExtension(fi).toLowerCase())) {
-					images.add(fi);
-				}
+		selectedDir.addListener(x -> updateImages());
 
-			}
-			listPics.setItems(images);
-		});
+		listHistoria.setItems(getApp().mediaHistoryItems);
+		listHistoria.getSelectionModel().selectedItemProperty()
+				.addListener(x -> updateImages());
 
-		listPics.setCellFactory(lv -> new MyListCell());
+		tabPane.getSelectionModel().selectedIndexProperty()
+				.addListener(x -> updateImages());
+
+		// listPics.setCellFactory(lv -> new MyListCell());
 		listPics.getSelectionModel().selectedItemProperty()
-				.addListener(new ChangeListener<File>() {
+				.addListener(new ChangeListener<String>() {
 					@Override
-					public void changed(ObservableValue<? extends File> x,
-							File oldValue, File newValue) {
-						getApp().getScreenPrepared().backgroundMediaProperty()
-								.set(newValue != null ? newValue.toString()
-										: "");
+					public void changed(ObservableValue<? extends String> x,
+							String oldValue, String newValue) {
+						if (newValue != null)
+							getApp().getScreenPrepared()
+									.backgroundMediaProperty()
+									.set(newValue != null ? newValue : "");
 					}
 				});
+
+		getApp().thumbnailsProperty().addListener(x -> {
+			listPics.update();
+		});
 
 		// uvodna inicializacia - select prvy adresar a expand
 		treeDirs.getSelectionModel().select(0);
 		root.setExpanded(true);
 	}
 
-	static String getFileExtension(File fi) {
-		String n = fi.getName();
-		int i = n.lastIndexOf('.');
-		if (i >= 0)
-			return n.substring(i + 1);
-		return "";
+	/**
+	 * 
+	 */
+	public void updateImages() {
+		ObservableList<String> images = FXCollections.observableArrayList();
+		switch (tabPane.getSelectionModel().getSelectedIndex()) {
+		case 0: {
+			String sd = selectedDir.get().getValue();
+			if (sd != null) {
+				File sdf = new File(getApp().dirPictures, sd);
+				if (sdf.exists())
+					for (String f : sdf.list()) {
+						File ff = new File(sdf, f);
+						if (!ff.isFile())
+							continue;
+						if (Utils.isImageFile(ff) || Utils.isVideoFile(ff)) {
+							String media = (sd.equals("") ? "" : sd + "/") + f;
+							images.add(media);
+						}
+
+					}
+			}
+			break;
+		}
+		case 1: {
+			MediaHistoryItem hi = listHistoria.getSelectionModel()
+					.getSelectedItem();
+			if (hi != null) {
+				images = hi.medias;
+			}
+		}
+		}
+		listPics.setItems(images);
 	}
 
-	private final class MyTreeCell extends TreeCell<File> {
+	private final class MyTreeCell extends TreeCell<String> {
 		private ImageView icon = new ImageView(new Image(getClass()
 				.getResourceAsStream("/sk/calvary/worship/background.png")));
 
@@ -121,37 +145,42 @@ public class BackPicPanel implements Initializable {
 		}
 
 		@Override
-		protected void updateItem(File item, boolean empty) {
+		protected void updateItem(String item, boolean empty) {
 			super.updateItem(item, empty);
 			if (empty) {
 				setText(null);
 				setGraphic(null);
 			} else {
-				setText(item.getName());
+				setText(new File(getApp().dirPictures, item).getName());
 				setGraphic(icon);
 			}
 		}
 	}
 
-	class MyTreeItem extends TreeItem<File> {
-		public MyTreeItem(File file) {
-			super(file);
+	class MyTreeItem extends TreeItem<String> {
+		public MyTreeItem(String dir) {
+			super(dir);
 		}
 
 		boolean initialized;
 
 		@Override
-		public ObservableList<TreeItem<File>> getChildren() {
+		public ObservableList<TreeItem<String>> getChildren() {
 			if (!initialized) {
 				initialized = true;
 
-				ObservableList<TreeItem<File>> children = super.getChildren();
+				ObservableList<TreeItem<String>> children = super.getChildren();
 
-				for (File f2 : getValue().listFiles()) {
-					if (!f2.isDirectory())
-						continue;
-					children.add(new MyTreeItem(f2));
-				}
+				String d = getValue();
+				File dir = new File(getApp().dirPictures, d);
+				if (dir.exists())
+					for (String fn2 : dir.list()) {
+						String d2 = (d.equals("") ? "" : d + "/") + fn2;
+						File f2 = new File(getApp().dirPictures, d2);
+						if (!f2.isDirectory())
+							continue;
+						children.add(new MyTreeItem(d2));
+					}
 			}
 			return super.getChildren();
 		}
@@ -159,20 +188,6 @@ public class BackPicPanel implements Initializable {
 		@Override
 		public boolean isLeaf() {
 			return getChildren().isEmpty();
-		}
-	}
-
-	class MyListCell extends ListCell<File> {
-		@Override
-		protected void updateItem(File item, boolean empty) {
-			super.updateItem(item, empty);
-
-			if (empty) {
-				setText(null);
-				setGraphic(null);
-			} else {
-				setText(item.getName());
-			}
 		}
 	}
 }

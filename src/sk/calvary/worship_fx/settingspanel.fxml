@@ -17,6 +17,8 @@
 <?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.Label?>
 <?import java.lang.Double?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 
 <VBox xmlns:fx="http://javafx.com/fxml/1" spacing="5"
 	style="-fx-padding: 5 5 5 5" fx:controller="sk.calvary.worship_fx.SettingsPanel">
@@ -25,7 +27,7 @@
 			<CheckBox text="Tien" fx:id="cbShadow"></CheckBox>
 			<CheckBox text="Zalamovat" fx:id="cbTextWordWrap"></CheckBox>
 			<HBox spacing="5" alignment="CENTER_LEFT">
-				<Label text="Velkost pisma:" />
+				<Label text="Velkost pisma:" prefWidth="150"/>
 				<Slider min="0.02" max="0.3" prefWidth="200" fx:id="slTextFontHeight" />
 				<fx:define>
 					<ToggleGroupValue fx:id="tgTextFontHeight" />
@@ -35,15 +37,47 @@
 						<Double fx:value="0.1" />
 					</userData>
 				</ToggleButtonND>
-
 				<Label fx:id="lbTextFontHeight" />
 			</HBox>
 		</VBox>
 	</TitledPane>
+	<TitledPane collapsible="false" text="Pozadie">
+		<VBox style="-fx-padding: 5 5 5 5" spacing="5">
+			<CheckBox text="pozadie vyplna celu obrazovku" fx:id="cbBackgroundFillScreen"></CheckBox>
+			<HBox spacing="5" alignment="CENTER_LEFT">
+				<Label text="Velkost nahladu:"  prefWidth="150"/>
+				<ComboBox fx:id="cbThumbnailSize" />
+			</HBox>
+		</VBox>
+	</TitledPane>	
 	<TitledPane collapsible="false" text="Aplikacia">
 		<VBox style="-fx-padding: 5 5 5 5" spacing="5">
+			<CheckBox text="pri spusteni hned inicializovat projektor" fx:id="cbAutoInitProjector"></CheckBox>
 			<HBox spacing="5" alignment="CENTER_LEFT">
-				<Label text="pomer stran:" />
+				<Label text="Prechod:"  prefWidth="150"/>
+				<Slider min="0" max="5" prefWidth="200" fx:id="slTransitionDuration" />
+				<fx:define>
+					<ToggleGroupValue fx:id="tgTransitionDuration" />
+				</fx:define>
+				<ToggleButtonND toggleGroup="$tgTransitionDuration" text="0.0">
+					<userData>
+						<Double fx:value="0.0" />
+					</userData>
+				</ToggleButtonND>
+				<ToggleButtonND toggleGroup="$tgTransitionDuration" text="0.7">
+					<userData>
+						<Double fx:value="0.7" />
+					</userData>
+				</ToggleButtonND>
+				<ToggleButtonND toggleGroup="$tgTransitionDuration" text="1.0">
+					<userData>
+						<Double fx:value="1.0" />
+					</userData>
+				</ToggleButtonND>
+				<Label fx:id="lbTransitionDuration" />
+			</HBox>
+			<HBox spacing="5" alignment="CENTER_LEFT">
+				<Label text="pomer stran:"  prefWidth="150"/>
 				<Slider min="0.5" max="2.0" prefWidth="200" fx:id="slHeight" />
 				<fx:define>
 					<ToggleGroupValue fx:id="tgHeight" />
@@ -67,11 +101,9 @@
 			</HBox>
 		</VBox>
 	</TitledPane>
-	<TitledPane collapsible="false" text="Aplikacia">
-		<VBox style="-fx-padding: 5 5 5 5" spacing="5">
-			<CheckBox text="pozadie vyplna celu obrazovku" fx:id="cbBackgroundFillScreen"></CheckBox>
-		</VBox>
-	</TitledPane>	
+	<HBox spacing="5" alignment="CENTER_LEFT">
+		<Button text="Ulozit nastavenia" onAction="#saveSettings"/>
+	</HBox>
 	<fx:script>
 		var Bindings=javafx.beans.binding.Bindings;
 		var
@@ -101,6 +133,18 @@
 		Bindings.bindBidirectional(
 		slHeight.valueProperty(),
 		screen.heightProperty());
+
+		Bindings.bindBidirectional(
+		cbAutoInitProjector.selectedProperty(),
+		controller.app.autoInitProjectorProperty());
+
+		Bindings.bindBidirectional(
+		slTransitionDuration.valueProperty(),
+		controller.app.transitionDurationProperty());
+
+		Bindings.bindBidirectional(
+		tgTransitionDuration.valueProperty(),
+		controller.app.transitionDurationProperty());
 
 		Bindings.bindBidirectional(
 		tgHeight.valueProperty(),

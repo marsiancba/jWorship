@@ -30,9 +30,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.util.Callback;
-import sk.calvary.misc.SearchInfo;
-import sk.calvary.misc.SearchTerm;
-import sk.calvary.worship.Song;
 import javafx.scene.input.MouseEvent;
 
 public class SongsPanel implements Initializable {

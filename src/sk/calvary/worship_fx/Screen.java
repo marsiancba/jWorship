@@ -183,7 +183,8 @@ public class Screen implements Observable {
 		return backgroundMedia.get();
 	}
 
-	StringProperty text = new SimpleStringProperty(this, "text", "");
+	private final StringProperty text = new SimpleStringProperty(this, "text",
+			"");
 
 	public StringProperty textProperty() {
 		return text;
@@ -258,5 +259,16 @@ public class Screen implements Observable {
 
 	public Screen() {
 		listProperties().forEach(p -> p.addListener(x -> invalidated()));
+	}
+
+	public void serialize(JSONSerializer s) {
+		s.serialize(textWordWrap);
+		s.serialize(textShadow);
+		s.serialize(textFit);
+		s.serialize(height);
+		s.serialize(textFontHeight);
+		s.serialize(backgroundFillScreen);
+		s.serializeEnum(textAlign, Align::valueOf);
+		s.serializeEnum(textAreaPart, TextAreaPart::valueOf);
 	}
 }

@@ -18,7 +18,7 @@ import java.util.Map;
  */
 public final class StringTools {
 	static final String diakCharsSmall = //
-	"αδθοινΎεςτσΰψϊύΉζκ³ρσΏ";
+	"Γ΅Γ¤ΔΔΓ©Γ­ΔΎΔΊΕΓ΄Γ³Ε•Ε™Ε΅Ε¥ΓΊΓ½ΕΎΔ…Δ‡Δ™Ε‚Ε„Γ³Ε›ΕΌΕΊ";
 
 	static final String diakCharsSmallNoDiak = //
 	"aacdeillnoorrstuyzacelnoszz";

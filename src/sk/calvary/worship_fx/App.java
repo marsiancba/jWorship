@@ -6,12 +6,20 @@ package sk.calvary.worship_fx;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -27,18 +35,17 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.media.Media;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaPlayer.Status;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import sk.calvary.worship.Song;
 import sk.calvary.worship_fx.Screen.ScreenPart;
 import sk.calvary.worship_fx.vlc.VLCMediaPlayer;
 import sk.calvary.worship_fx.vlc.VLCMediaView;
-import uk.co.caprica.vlcj.discovery.NativeDiscovery;
 
 public class App extends Application implements Initializable {
 
@@ -60,8 +67,63 @@ public class App extends Application implements Initializable {
 	private final ObservableList<Song> songs = FXCollections
 			.observableArrayList();
 
+	final ObservableList<MediaHistoryItem> mediaHistoryItems = FXCollections
+			.observableArrayList();
+
 	@FXML
 	SongsPanel panelSongs;
+
+	public enum ThumbnailSize {
+		Size_60_45(60, 45), Size_80_60(80, 60), Size_120_90(120, 90);
+
+		public final int maxWidh;
+		public final int maxHeight;
+
+		private ThumbnailSize(int maxWidh, int maxHeight) {
+			this.maxWidh = maxWidh;
+			this.maxHeight = maxHeight;
+		}
+
+		Thumbnails makeThumbnails() {
+			return new Thumbnails(maxWidh, maxHeight);
+		}
+	}
+
+	private final ObjectProperty<ThumbnailSize> thumbnailSize = new SimpleObjectProperty<App.ThumbnailSize>(
+			this, "thumbnailSize", ThumbnailSize.Size_60_45);
+
+	public ThumbnailSize getThumbnailSize() {
+		return thumbnailSize.get();
+	}
+
+	public ObjectProperty<ThumbnailSize> thumbnailSizeProperty() {
+		return thumbnailSize;
+	}
+
+	private final ObjectProperty<Thumbnails> thumbnails = new SimpleObjectProperty<>(
+			this, "thumbnails", getThumbnailSize().makeThumbnails());
+
+	public Thumbnails getThumbnails() {
+		return thumbnails.get();
+	}
+
+	public ObjectProperty<Thumbnails> thumbnailsProperty() {
+		return thumbnails;
+	}
+
+	private final DoubleProperty transitionDuration = new SimpleDoubleProperty(
+			this, "transitionDuration", 1);
+
+	public DoubleProperty transitionDurationProperty() {
+		return transitionDuration;
+	}
+
+	private final BooleanProperty autoInitProjector = new SimpleBooleanProperty(
+			this, "autoInitProjector", true);
+
+	public BooleanProperty autoInitProjectorProperty() {
+		return autoInitProjector;
+	}
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
@@ -102,31 +164,37 @@ public class App extends Application implements Initializable {
 		primaryStage.setOnHidden(e -> closeProjector());
 
 		loadSongs();
+
+		if (autoInitProjector.get())
+			openProjector(ProjectorModes.NORMAL_START);
 	}
 
 	@Override
 	public void stop() throws Exception {
+		saveHistory();
 		for (Node n : mediaNode2media.keySet().toArray(new Node[0])) {
 			destroyBackgroundMediaNode(n);
 		}
 	}
 
 	public static void main(String[] args) {
-		System.out.println("VLC found=" + new NativeDiscovery().discover());
 		launch(args);
 	}
 
 	File dirSongs = new File("songs");
+	File dirPictures = new File("pictures");
 
 	void loadSongs() {
-		String[] l = dirSongs.list();
-		for (int i = 0; i < l.length; i++) {
-			File f = new File(dirSongs, l[i]);
-			if (f.isFile()) {
-				try {
-					songs.add(Song.load(f));
-				} catch (Exception e) {
-					e.printStackTrace();
+		if (dirSongs.exists()) {
+			String[] l = dirSongs.list();
+			for (int i = 0; i < l.length; i++) {
+				File f = new File(dirSongs, l[i]);
+				if (f.isFile()) {
+					try {
+						songs.add(Song.load(f));
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		}
@@ -139,6 +207,16 @@ public class App extends Application implements Initializable {
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		screenViewPrepared.setScreen(screenPrepared);
+		thumbnailSize.addListener(x -> {
+			thumbnails.set(thumbnailSize.get().makeThumbnails());
+		});
+
+		try {
+			loadSettings();
+			loadHistory();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public Screen getScreenPrepared() {
@@ -165,6 +243,12 @@ public class App extends Application implements Initializable {
 			screen.copyFrom(screenPrepared, part::contains);
 		}
 		setLiveScreen(screen);
+
+		// save history
+		String media = screen.getBackgroundMedia();
+		if (!"".equals(media)) {
+			addMediaHistory(media);
+		}
 	}
 
 	void setLiveScreen(Screen screen) {
@@ -183,21 +267,40 @@ public class App extends Application implements Initializable {
 			return null;
 		if (media.equals(""))
 			return null;
-		File f = new File(media);
+		File f = new File(dirPictures, media);
 		if (f.exists() && f.isFile()) {
-			String ext = BackPicPanel.getFileExtension(f).toLowerCase();
 			try {
-				switch (ext) {
-				case "jpg":
-				case "jpeg":
-				case "png":
+				if (Utils.isImageFile(f)) {
 					try {
 						return new ImageView(
 								new Image(f.toURI().toURL().toExternalForm()));
 					} catch (MalformedURLException e) {
 						e.printStackTrace();
 					}
-				case "mp4X": {
+				}
+				if (Utils.isVideoFile(f)) {
+					VLCMediaPlayer mp = media2vlcMediaPlayer.get(media);
+					if (mp == null) {
+						mp = new VLCMediaPlayer(f);
+						mp.statusProperty().addListener(
+								(ObservableValue<? extends Status> a, Status b,
+										Status st) -> {
+									System.out.println(media + " -> " + st);
+								});
+						media2vlcMediaPlayer.put(media, mp);
+						mp.setVolume(0);
+						VLCMediaPlayer mp0 = mp;
+						mp.setOnFrame(is -> {
+							if (mp0.getCurrentTime().toSeconds() > Math.min(1,
+									mp0.getCycleDuration().toSeconds() * 0.5))
+								getThumbnails().makeThumbnailIfNeeded(f, is);
+						});
+					}
+					VLCMediaView mv = new VLCMediaView(mp);
+					mediaNode2media.put(mv, media);
+					return mv;
+				}
+				/*case "mp4": {
 					MediaPlayer mp = media2mediaPlayer.get(media);
 					if (mp == null) {
 						mp = new MediaPlayer(
@@ -216,25 +319,7 @@ public class App extends Application implements Initializable {
 					mv.setPreserveRatio(true);
 					mediaNode2media.put(mv, media);
 					return mv;
-				}
-				case "mp4":
-				case "mpg": {
-					VLCMediaPlayer mp = media2vlcMediaPlayer.get(media);
-					if (mp == null) {
-						mp = new VLCMediaPlayer(new File(media));
-						mp.statusProperty().addListener(
-								(ObservableValue<? extends Status> a, Status b,
-										Status st) -> {
-									System.out.println(media + " -> " + st);
-								});
-						media2vlcMediaPlayer.put(media, mp);
-						mp.setVolume(0);
-					}
-					VLCMediaView mv = new VLCMediaView(mp);
-					mediaNode2media.put(mv, media);
-					return mv;
-				}
-				}
+				}*/
 			} catch (Exception e) {
 				e.printStackTrace();
 				Text text = new Text(e.toString());
@@ -257,14 +342,11 @@ public class App extends Application implements Initializable {
 					media2mediaPlayer.remove(media);
 				}
 			};
-			if (true) {
-				// zmazeme neskor
-				// obcas koli tomu pada JVM, ak ano, prenut na druhu vetvu
-				Platform.runLater(r);
-			} else {
-				r.run();
-			}
-			// mv.setMediaPlayer(null);
+			
+			// zmazeme neskor
+			// obcas koli tomu pada JVM, ak ano, prenut na druhu vetvu
+			Platform.runLater(r);
+			// r.run();
 		}
 
 		if (n instanceof VLCMediaView) {
@@ -332,21 +414,92 @@ public class App extends Application implements Initializable {
 		}
 
 		screenViewProjector = new ScreenView();
+		screenViewProjector.setBackground(
+				new Background(new BackgroundFill(Color.BLACK, null, null)));
+
 		projectorStage = new Stage();
 		projectorStage.setScene(new Scene(screenViewProjector));
 		projectorStage.setX(monitor.getVisualBounds().getMinX());
 		projectorStage.setY(monitor.getVisualBounds().getMinY());
-		if (mode != ProjectorModes.WINDOW) {
+		if (mode == ProjectorModes.WINDOW) {
+			projectorStage.setWidth(640);
+			projectorStage.setHeight(480);
+		} else {
 			projectorStage.setFullScreen(true);
 		}
+		projectorStage.setAlwaysOnTop(true);
 		projectorStage.show();
 		projectorStage.setOnHidden(e -> closeProjector());
 
 		screenViewProjector.setScreen(screenLive);
 	}
 
+	@FXML
+	void saveAll() {
+		saveSettings();
+		saveHistory();
+	}
+
 	static final File settingsFile = new File("settings/generalSettings.json");
+	static final File mediaHistoryFile = new File("settings/mediaHistory.json");
 
 	void saveSettings() {
+		backupFile(settingsFile);
+		JSONSerializer s = JSONSerializer.writer();
+		serializeSettings(s);
+		s.write(settingsFile);
+	}
+
+	void loadSettings() {
+		serializeSettings(JSONSerializer.reader(settingsFile));
+	}
+
+	public void serializeSettings(JSONSerializer s) {
+		s.serialize(transitionDuration);
+		s.serialize(autoInitProjector);
+		s.serializeEnum(thumbnailSize, ThumbnailSize::valueOf);
+		s.serializeSubObject("screen", screenPrepared::serialize);
+	}
+
+	void addMediaHistory(String media) {
+		String historyName = new SimpleDateFormat("yyyy-MM-dd")
+				.format(new Date());
+
+		MediaHistoryItem hi = null;
+		for (MediaHistoryItem hi0 : mediaHistoryItems) {
+			if (hi0.getName().equals(historyName)) {
+				hi = hi0;
+				break;
+			}
+		}
+		if (hi == null) {
+			hi = new MediaHistoryItem(historyName);
+			mediaHistoryItems.add(0, hi);
+		}
+
+		hi.medias.remove(media);
+		hi.medias.add(0, media);
+	}
+
+	void saveHistory() {
+		backupFile(mediaHistoryFile);
+		JSONSerializer s = JSONSerializer.writer();
+		serializeHistory(s);
+		s.write(mediaHistoryFile);
+	}
+
+	void loadHistory() {
+		serializeHistory(JSONSerializer.reader(mediaHistoryFile));
+	}
+
+	void serializeHistory(JSONSerializer s) {
+		s.serializeObjectList("history", mediaHistoryItems,
+				MediaHistoryItem::new, MediaHistoryItem::serialize);
+	}
+
+	void backupFile(File f) {
+		if (!f.exists())
+			return;
+		// TODO
 	}
 }
