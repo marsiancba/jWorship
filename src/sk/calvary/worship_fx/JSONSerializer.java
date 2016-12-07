@@ -5,8 +5,8 @@ package sk.calvary.worship_fx;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -46,7 +46,10 @@ public interface JSONSerializer {
 
 	<T> boolean serializeStringList(String name, List<String> list);
 
-	void write(File f);
+	<T> boolean serializeObjectListAsStrings(String name, List<T> list,
+			Function<T, String> encoder, Function<String, T> decoder);
+
+	void write(File f) throws IOException;
 
 	static JSONSerializer writer(JsonObjectBuilder b) {
 		return new Writer(b);
@@ -109,14 +112,11 @@ public interface JSONSerializer {
 		}
 
 		@Override
-		public void write(File f) {
+		public void write(File f) throws IOException {
 			try (JsonWriter w = Json.createWriter(new FileOutputStream(f))) {
 				w.write(get());
 				w.close();
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
 			}
-
 		}
 
 		@Override
@@ -138,6 +138,18 @@ public interface JSONSerializer {
 			JsonArrayBuilder ja = Json.createArrayBuilder();
 			for (String s : list) {
 				ja.add(s);
+			}
+			j.add(name, ja);
+			return true;
+		}
+
+		@Override
+		public <T> boolean serializeObjectListAsStrings(String name,
+				List<T> list, Function<T, String> encoder,
+				Function<String, T> decoder) {
+			JsonArrayBuilder ja = Json.createArrayBuilder();
+			for (T item : list) {
+				ja.add(encoder.apply(item));
 			}
 			j.add(name, ja);
 			return true;
@@ -259,13 +271,33 @@ public interface JSONSerializer {
 			return false;
 		}
 
+		@Override
+		public <T> boolean serializeObjectListAsStrings(String name,
+				List<T> list, Function<T, String> encoder,
+				Function<String, T> decoder) {
+			JsonValue jv = j.get(name);
+			if (jv instanceof JsonArray) {
+				JsonArray ja = (JsonArray) jv;
+				for (JsonValue jv2 : ja) {
+					if (jv2 instanceof JsonString) {
+						JsonString js = (JsonString) jv2;
+						T item = decoder.apply(js.getString());
+						if (item != null)
+							list.add(item);
+					}
+				}
+				return true;
+			}
+			return false;
+		}
+
 	}
 
 	static JSONSerializer reader(JsonObject r) {
 		return new Reader(r);
 	}
 
-	static JSONSerializer reader(File f) {
+	static JSONSerializer reader(File f) throws IOException {
 		if (f.exists()) {
 			try (JsonReader r = Json.createReader(new FileInputStream(f))) {
 				JSONSerializer s = reader(r.readObject());

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Dialog?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.ButtonType?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TextArea?>
+<?import sk.calvary.worship_fx.ImagesListView?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.control.ListView?>
+
+<Dialog xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.calvary.worship_fx.PlaylistsEditor"
+	fx:id="dlg" title="Playlisty">
+	<dialogPane>
+		<DialogPane prefWidth="700" prefHeight="600">
+			<content>
+				<GridPane hgap="5" vgap="5">
+					<ListView fx:id="listPlaylists" GridPane.rowIndex="0"
+						GridPane.columnIndex="0" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS" />
+					<HBox spacing="15" alignment="CENTER_LEFT" styleClass="button-bar"
+						GridPane.rowIndex="1" GridPane.columnIndex="0" style="-fx-padding: 0 5 0 0">
+						<Button text="Novy" onAction="#newPlaylist" />
+						<Button fx:id="btnPlaylistRename" text="Premenovat" onAction="#renamePlaylist" />
+						<Button fx:id="btnPlaylistRemove" text="Zmazat" onAction="#removePlaylist"/>
+					</HBox>
+					<ListView fx:id="listItems" GridPane.rowIndex="0"
+						GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS" />
+					<HBox spacing="15" alignment="CENTER_LEFT" styleClass="button-bar"
+						GridPane.rowIndex="1" GridPane.columnIndex="1" style="-fx-padding: 0 5 0 0">
+						<Button fx:id="btnItemAdd" text="Pridat" onAction="#addItem" />
+						<Button fx:id="btnItemRemove" text="Vymazat" onAction="#removeItem"/>
+						<Button fx:id="btnItemUp" text="▲" onAction="#moveItemUp"/>
+						<Button fx:id="btnItemDown" text="▼"  onAction="#moveItemDown"/>
+					</HBox>
+				</GridPane>
+			</content>
+			<ButtonType fx:constant="CLOSE" />
+		</DialogPane>
+	</dialogPane>
+</Dialog>
+

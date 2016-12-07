@@ -23,7 +23,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.ListView;
 
-public class BackPicPanel implements Initializable {
+public class BackgroundPanel implements Initializable {
 	public App getApp() {
 		return App.app;
 	}
@@ -36,7 +36,12 @@ public class BackPicPanel implements Initializable {
 	@FXML
 	TabPane tabPane;
 	@FXML
-	ListView<MediaHistoryItem> listHistoria;
+	ListView<MediaHistoryItem> listHistory;
+	@FXML
+	ListView<Song> listSongs;
+
+	private ObservableList<Song> recentSongs = FXCollections
+			.observableArrayList();
 
 	@FXML
 	public void empty() {
@@ -72,8 +77,8 @@ public class BackPicPanel implements Initializable {
 
 		selectedDir.addListener(x -> updateImages());
 
-		listHistoria.setItems(getApp().mediaHistoryItems);
-		listHistoria.getSelectionModel().selectedItemProperty()
+		listHistory.setItems(getApp().mediaHistoryItems);
+		listHistory.getSelectionModel().selectedItemProperty()
 				.addListener(x -> updateImages());
 
 		tabPane.getSelectionModel().selectedIndexProperty()
@@ -94,6 +99,25 @@ public class BackPicPanel implements Initializable {
 
 		getApp().thumbnailsProperty().addListener(x -> {
 			listPics.update();
+		});
+
+		listSongs.setItems(recentSongs);
+		listSongs.getSelectionModel().selectedItemProperty().addListener(x -> {
+			if (tabPane.getSelectionModel().getSelectedIndex() == 2)
+				updateImages();
+		});
+
+		getApp().selectedSong.addListener((x, a, b) -> {
+			if (b != null && !b.backgrounds.isEmpty()
+					&& (recentSongs.isEmpty() || b != recentSongs.get(0))) {
+				boolean wasSelected = listSongs.getSelectionModel()
+						.getSelectedItem() == b;
+				recentSongs.remove(b);
+				recentSongs.add(0, b);
+				if (wasSelected)
+					listSongs.getSelectionModel().select(b);
+				updateImages();
+			}
 		});
 
 		// uvodna inicializacia - select prvy adresar a expand
@@ -126,11 +150,19 @@ public class BackPicPanel implements Initializable {
 			break;
 		}
 		case 1: {
-			MediaHistoryItem hi = listHistoria.getSelectionModel()
+			MediaHistoryItem hi = listHistory.getSelectionModel()
 					.getSelectedItem();
 			if (hi != null) {
 				images = hi.medias;
 			}
+			break;
+		}
+		case 2: {
+			Song s = listSongs.getSelectionModel().getSelectedItem();
+			if (s != null) {
+				images = s.backgrounds;
+			}
+			break;
 		}
 		}
 		listPics.setItems(images);

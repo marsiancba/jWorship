@@ -15,7 +15,7 @@
 <?import javafx.scene.control.ListView?>
 
 <GridPane xmlns:fx="http://javafx.com/fxml/1"
-	fx:controller="sk.calvary.worship_fx.BackPicPanel" 
+	fx:controller="sk.calvary.worship_fx.BackgroundPanel" 
 	hgap="5" 
 	vgap="5"
 	style="-fx-padding: 5 0 5 0"
@@ -61,7 +61,10 @@
 			<TreeView fx:id="treeDirs"/>
 		</Tab>
 		<Tab text="Historia" closable="false">
-			<ListView fx:id="listHistoria"/>
+			<ListView fx:id="listHistory"/>
+		</Tab>
+		<Tab text="Piesne" closable="false">
+			<ListView fx:id="listSongs"/>
 		</Tab>
 	</TabPane>
 	<ImagesListView fx:id="listPics"

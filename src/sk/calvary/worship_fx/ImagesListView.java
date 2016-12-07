@@ -4,12 +4,16 @@
 package sk.calvary.worship_fx;
 
 import java.io.File;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
+import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -25,6 +29,8 @@ import javafx.scene.paint.Color;
 
 public class ImagesListView extends ScrollPane {
 	TilePane tilePane;
+
+	boolean invalid = false;
 
 	public ImagesListView() {
 		// getStyleClass().setAll("list-view");
@@ -43,15 +49,15 @@ public class ImagesListView extends ScrollPane {
 	ObjectProperty<ObservableList<String>> items = new SimpleObjectProperty<>(
 			this, "items", FXCollections.<String> observableArrayList());
 
-	ObjectProperty<String> selectedItem = new SimpleObjectProperty<String>(this,
-			"selectedItem", null);
+	StringProperty selectedItem = new SimpleStringProperty(this, "selectedItem",
+			"");
 
 	class MySelectionModel {
 		public void clearSelection() {
-			selectedItem.set(null);
+			selectedItem.set("");
 		}
 
-		public ReadOnlyObjectProperty<String> selectedItemProperty() {
+		public ReadOnlyStringProperty selectedItemProperty() {
 			return selectedItem;
 		}
 
@@ -63,10 +69,14 @@ public class ImagesListView extends ScrollPane {
 		return selectionModel;
 	}
 
+	final InvalidationListener IL = x -> invalidate();
+
 	public void setItems(ObservableList<String> items) {
+		this.items.get().removeListener(IL);
 		this.items.set(items);
-		createCells();
+		this.items.get().addListener(IL);
 		selectedItem.set(null);
+		invalidate();
 	}
 
 	private final Map<String, Label> cells = new HashMap<>();
@@ -87,7 +97,25 @@ public class ImagesListView extends ScrollPane {
 			});
 		}
 	}
-	
+
+	void invalidate() {
+		if (!selectedItem.isEmpty().get()) {
+			if (!items.get().contains(selectedItem.get()))
+				selectedItem.set("");
+		}
+		if (invalid)
+			return;
+		invalid = true;
+		Platform.runLater(() -> validate());
+	}
+
+	void validate() {
+		if (!invalid)
+			return;
+		invalid = false;
+		update();
+	}
+
 	public void update() {
 		createCells();
 	}
@@ -96,7 +124,7 @@ public class ImagesListView extends ScrollPane {
 		Label cell = cells.get(item);
 		if (cell == null)
 			return;
-		File f=new File(getApp().dirPictures, item);
+		File f = new File(getApp().dirPictures, item);
 
 		Thumbnails thumbnails = App.app.getThumbnails();
 

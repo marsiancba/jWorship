@@ -4,6 +4,7 @@
 package sk.calvary.worship_fx;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -20,6 +21,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -48,6 +50,7 @@ import sk.calvary.worship_fx.vlc.VLCMediaPlayer;
 import sk.calvary.worship_fx.vlc.VLCMediaView;
 
 public class App extends Application implements Initializable {
+	public static final String VERSION = "4.2";
 
 	public static App app;
 	private Parent root;
@@ -67,7 +70,12 @@ public class App extends Application implements Initializable {
 	private final ObservableList<Song> songs = FXCollections
 			.observableArrayList();
 
+	final ObjectProperty<Song> selectedSong = new SimpleObjectProperty<>();
+
 	final ObservableList<MediaHistoryItem> mediaHistoryItems = FXCollections
+			.observableArrayList();
+
+	final ObservableList<Playlist> playlists = FXCollections
 			.observableArrayList();
 
 	@FXML
@@ -120,6 +128,7 @@ public class App extends Application implements Initializable {
 
 	private final BooleanProperty autoInitProjector = new SimpleBooleanProperty(
 			this, "autoInitProjector", true);
+	Stage stage;
 
 	public BooleanProperty autoInitProjectorProperty() {
 		return autoInitProjector;
@@ -128,6 +137,7 @@ public class App extends Application implements Initializable {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		app = this;
+		stage = primaryStage;
 
 		FXMLLoader l = new FXMLLoader(getClass().getResource("app.fxml"));
 		l.setController(this);
@@ -138,7 +148,7 @@ public class App extends Application implements Initializable {
 				.add(getClass().getResource("app.css").toExternalForm());
 		primaryStage.setScene(scene);
 		primaryStage.setMaximized(true);
-		primaryStage.setTitle("jWorship FX 4.0");
+		primaryStage.setTitle("jWorship FX "+VERSION);
 		primaryStage.show();
 
 		scene.addEventHandler(KeyEvent.KEY_TYPED, e -> {
@@ -163,8 +173,6 @@ public class App extends Application implements Initializable {
 
 		primaryStage.setOnHidden(e -> closeProjector());
 
-		loadSongs();
-
 		if (autoInitProjector.get())
 			openProjector(ProjectorModes.NORMAL_START);
 	}
@@ -172,6 +180,7 @@ public class App extends Application implements Initializable {
 	@Override
 	public void stop() throws Exception {
 		saveHistory();
+		savePlaylists();
 		for (Node n : mediaNode2media.keySet().toArray(new Node[0])) {
 			destroyBackgroundMediaNode(n);
 		}
@@ -213,7 +222,11 @@ public class App extends Application implements Initializable {
 
 		try {
 			loadSettings();
+			loadSongs(); // musi byt pred loadPlaylists!!
+
+			
 			loadHistory();
+			loadPlaylists();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -342,7 +355,7 @@ public class App extends Application implements Initializable {
 					media2mediaPlayer.remove(media);
 				}
 			};
-			
+
 			// zmazeme neskor
 			// obcas koli tomu pada JVM, ak ano, prenut na druhu vetvu
 			Platform.runLater(r);
@@ -438,23 +451,34 @@ public class App extends Application implements Initializable {
 	void saveAll() {
 		saveSettings();
 		saveHistory();
+		savePlaylists();
 	}
 
 	static final File settingsFile = new File("settings/generalSettings.json");
 	static final File mediaHistoryFile = new File("settings/mediaHistory.json");
+	static final File playlistsFile = new File("settings/playlists.json");
 
 	void saveSettings() {
-		backupFile(settingsFile);
+		Utils.backupFile(settingsFile);
 		JSONSerializer s = JSONSerializer.writer();
 		serializeSettings(s);
-		s.write(settingsFile);
+		try {
+			s.write(settingsFile);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	void loadSettings() {
-		serializeSettings(JSONSerializer.reader(settingsFile));
+		try {
+			serializeSettings(JSONSerializer.reader(settingsFile));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void serializeSettings(JSONSerializer s) {
+		s.serialize(new SimpleStringProperty(this, "version", VERSION));
 		s.serialize(transitionDuration);
 		s.serialize(autoInitProjector);
 		s.serializeEnum(thumbnailSize, ThumbnailSize::valueOf);
@@ -482,24 +506,62 @@ public class App extends Application implements Initializable {
 	}
 
 	void saveHistory() {
-		backupFile(mediaHistoryFile);
+		Utils.backupFile(mediaHistoryFile);
 		JSONSerializer s = JSONSerializer.writer();
 		serializeHistory(s);
-		s.write(mediaHistoryFile);
+		try {
+			s.write(mediaHistoryFile);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	void loadHistory() {
-		serializeHistory(JSONSerializer.reader(mediaHistoryFile));
+		try {
+			serializeHistory(JSONSerializer.reader(mediaHistoryFile));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	void serializeHistory(JSONSerializer s) {
+		s.serialize(new SimpleStringProperty(this, "version", VERSION));
 		s.serializeObjectList("history", mediaHistoryItems,
 				MediaHistoryItem::new, MediaHistoryItem::serialize);
 	}
 
-	void backupFile(File f) {
-		if (!f.exists())
-			return;
-		// TODO
+	void savePlaylists() {
+		Utils.backupFile(playlistsFile);
+		JSONSerializer s = JSONSerializer.writer();
+		serializePlaylists(s);
+		try {
+			s.write(playlistsFile);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	void loadPlaylists() {
+		try {
+			serializePlaylists(JSONSerializer.reader(playlistsFile));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	void serializePlaylists(JSONSerializer s) {
+		s.serialize(new SimpleStringProperty(this, "version", VERSION));
+		s.serializeObjectList("playlists", playlists,
+				Playlist::new, Playlist::serialize);
+	}
+	
+	Song getSongByFileName(String name) {
+		if (name == null || name.equals(""))
+			return null;
+		for (Song s : songs) {
+			if (name.equals(s.getFileName()))
+				return s;
+		}
+		return null;
 	}
 }

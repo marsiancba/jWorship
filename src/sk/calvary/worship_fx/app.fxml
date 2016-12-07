@@ -45,7 +45,7 @@
 									<fx:include source="songspanel.fxml"/>
 								</StealerPane>
 								<StealerPane id="pane_backpic">
-									<fx:include source="backpicpanel.fxml"/>
+									<fx:include source="backgroundpanel.fxml"/>
 								</StealerPane>
 							</SplitPane>
 						</Tab>

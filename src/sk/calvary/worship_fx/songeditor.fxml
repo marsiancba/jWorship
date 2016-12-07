@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Dialog?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.ButtonType?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TextArea?>
+<?import sk.calvary.worship_fx.ImagesListView?>
+<?import javafx.scene.layout.FlowPane?>
+
+<Dialog xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.calvary.worship_fx.SongEditor"
+	fx:id="dlg" title="Piesen">
+	<dialogPane>
+		<DialogPane prefWidth="700" prefHeight="600">
+			<content>
+				<GridPane hgap="5" vgap="5">
+					<Label text="Nazov" GridPane.rowIndex="0"
+						GridPane.columnIndex="0" />
+					<TextField GridPane.rowIndex="0" GridPane.columnIndex="1"
+						GridPane.hgrow="ALWAYS" fx:id="tfTitle" />
+					<Label text="Nazov 2" GridPane.rowIndex="1"
+						GridPane.columnIndex="0" />
+					<TextField GridPane.rowIndex="1" GridPane.columnIndex="1"
+						GridPane.hgrow="ALWAYS" fx:id="tfTitle2" />
+					<Label text="Autor" GridPane.rowIndex="2"
+						GridPane.columnIndex="0" />
+					<TextField GridPane.rowIndex="2" GridPane.columnIndex="1"
+						GridPane.hgrow="ALWAYS" fx:id="tfAuthor" />
+					<HBox spacing="5" GridPane.rowIndex="3" GridPane.columnIndex="0"
+						GridPane.vgrow="ALWAYS" GridPane.columnSpan="2">
+						<TextArea HBox.hgrow="ALWAYS" style="-fx-font-size: 150%"
+							fx:id="taVerses" />
+						<VBox spacing="5" HBox.hgrow="ALWAYS" minWidth="150">
+							<ImagesListView VBox.vgrow="ALWAYS"
+								fx:id="listBackgrounds" />
+							<FlowPane hgap="5">
+								<Button text="Pridat" fx:id="btnBackgroundAdd" onAction="#backgroundAdd"/>
+								<Button text="Zmazat" fx:id="btnBackgroundRemove" onAction="#backgroundRemove" />
+							</FlowPane> 
+						</VBox>
+					</HBox>
+				</GridPane>
+			</content>
+			<ButtonType fx:constant="OK" />
+			<ButtonType fx:constant="CANCEL" />
+		</DialogPane>
+	</dialogPane>
+</Dialog>
+

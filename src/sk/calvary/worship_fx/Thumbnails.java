@@ -21,6 +21,7 @@ import javax.imageio.ImageIO;
 import javafx.application.Platform;
 import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
+import javafx.scene.paint.Color;
 
 public class Thumbnails {
 	final int maxWidth;
@@ -69,7 +70,11 @@ public class Thumbnails {
 			return makeImageThumbnail(f);
 		if (Utils.isVideoFile(f)) {
 			// dummy image, may get filled makeThumbnailIfNeeded
-			return new WritableImage(maxWidth, maxHeight);
+			WritableImage thi = new WritableImage(maxWidth, maxHeight);
+			for(int y=0; y<maxHeight; y++)
+				for(int x=0;x<maxWidth; x++)
+					thi.getPixelWriter().setColor(x, y, Color.BLACK);;
+			return thi;
 		}
 		return null;
 	}

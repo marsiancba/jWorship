@@ -6,7 +6,10 @@ package sk.calvary.worship_fx;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.CopyOption;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.DosFileAttributeView;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -24,6 +27,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Region;
 import javafx.scene.media.MediaView;
 import javafx.scene.shape.Rectangle;
+import sk.calvary.misc.StringTools;
 import sk.calvary.worship_fx.vlc.VLCMediaView;
 
 public class Utils {
@@ -150,6 +154,14 @@ public class Utils {
 		return "";
 	}
 
+	public static String getFileName(File fi) {
+		String n = fi.getName();
+		int i = n.lastIndexOf('.');
+		if (i >= 0)
+			return n.substring(0, i);
+		return "";
+	}
+
 	static final Set<String> imageExtensions = new HashSet<String>(
 			Arrays.asList(new String[] { "png", "jpg", "jpeg", }));
 
@@ -227,5 +239,54 @@ public class Utils {
 	public static boolean isSimpleLetterOrDigit(char c) {
 		return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
 				|| (c >= '0' && c <= '9');
+	}
+
+	static void backupFile(File f) {
+		if (!f.exists())
+			return;
+		File dir = f.getParentFile();
+		if (!dir.exists() || !dir.isDirectory())
+			return;
+		File bdir = new File(dir, "backup");
+		if (!bdir.exists()) {
+			if (!bdir.mkdir())
+				return;
+		}
+		File fb = new File(bdir, f.getName()+"_"+(int)(Math.random()*100)+".bak");
+		try {
+			Files.copy(f.toPath(), fb.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static String friendlyFileName(String s) {
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < s.length(); i++) {
+			char c = s.charAt(i);
+			c = StringTools.undiak(c);
+			if (StringTools.isSimpleLetterOrDigit(c))
+				sb.append(c);
+			else
+				sb.append('_');
+		}
+		return sb.toString();
+	}
+
+	public static File newFriendlyFile(File dir, String title,
+			String extension) {
+		String name = friendlyFileName(title);
+
+		File res;
+
+		res = new File(dir, name + "." + extension);
+		if (!res.isFile())
+			return res;
+
+		for (int i = 1; true; i++) {
+			res = new File(dir, name + "_" + i + "." + extension);
+			if (!res.isFile())
+				return res;
+		}
 	}
 }
