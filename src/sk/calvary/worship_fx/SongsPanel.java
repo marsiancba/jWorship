@@ -44,347 +44,394 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 
 public class SongsPanel implements Initializable {
-	public App getApp() {
-		return App.app;
-	}
 
-	@FXML
-	ListView<Song> listSongs;
+    public App getApp() {
+        return App.app;
+    }
 
-	@FXML
-	ListView<String> listVerses;
+    @FXML
+    ListView<Song> listSongs;
 
-	final ObjectProperty<Song> selectedSong = new SimpleObjectProperty<Song>(
-			null);
+    @FXML
+    ListView<String> listVerses;
 
-	@FXML
-	ToggleButton tgSeparateWithBlankLines;
+    final ObjectProperty<Song> selectedSong = new SimpleObjectProperty<Song>(
+            null);
 
-	@FXML
-	TextField tfSearch;
+    @FXML
+    ToggleButton tgSeparateWithBlankLines;
 
-	final ObservableList<Song> searchResults = FXCollections
-			.observableArrayList();
+    @FXML
+    ToggleButton btnMoreOptions;
+    @FXML
+    TextField tfSearch;
 
-	@FXML
-	Button tf123;
+    final ObservableList<Song> searchResults = FXCollections
+            .observableArrayList();
 
-	@FXML
-	GridPane root;
+    @FXML
+    Button tf123;
 
-	@FXML
-	Button btnEdit;
+    @FXML
+    GridPane root;
 
-	@FXML
-	Button btnPlaylist;
+    @FXML
+    Button btnEdit;
 
-	private PlaylistsEditor editor;
+    @FXML
+    Button btnPlaylist;
 
-	Playlist allSongs = new Playlist();
+    private PlaylistsEditor editor;
 
-	@FXML
-	ComboBox<Playlist> comboPlaylist;
+    Playlist allSongs = new Playlist();
 
-	ObjectProperty<Playlist> selectedPlaylist = new SimpleObjectProperty<>();
+    @FXML
+    ComboBox<Playlist> comboPlaylist;
 
-	@FXML
-	Label lblShowingSearch;
+    ObjectProperty<Playlist> selectedPlaylist = new SimpleObjectProperty<>();
 
-	public ObjectProperty<Song> selectedSongProperty() {
-		return selectedSong;
-	}
+    @FXML
+    Label lblShowingSearch;
 
-	@SuppressWarnings("incomplete-switch")
-	@Override
-	public void initialize(URL location, ResourceBundle resources) {
-		getApp().panelSongs = this;
+    public ObjectProperty<Song> selectedSongProperty() {
+        return selectedSong;
+    }
 
-		selectedSong.addListener(x -> {
-			Song s = selectedSong.get();
-			listVerses.setItems(
-					s != null ? s.verses : FXCollections.observableArrayList());
-		});
+    @SuppressWarnings("incomplete-switch")
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        getApp().panelSongs = this;
 
-		listSongs
-				.setCellFactory(new Callback<ListView<Song>, ListCell<Song>>() {
-					@Override
-					public ListCell<Song> call(ListView<Song> param) {
-						return new ListCell<Song>() {
-							@Override
-							protected void updateItem(Song item,
-									boolean empty) {
-								super.updateItem(item, empty);
-								textProperty().unbind();
-								if (item == null) {
-									setText(null);
-								} else {
-									textProperty()
-											.bind(item.toStringProperty());
-								}
-							}
-						};
-					}
-				});
-		listSongs.getSelectionModel().selectedItemProperty().addListener(x -> {
-			selectedSongProperty()
-					.set(listSongs.getSelectionModel().getSelectedItem());
-		});
+        selectedSong.addListener(x -> {
+            Song s = selectedSong.get();
+            listVerses.setItems(
+                    s != null ? s.verses : FXCollections.observableArrayList());
+        });
 
-		listVerses.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-		listVerses.getSelectionModel().getSelectedItems()
-				.addListener((Observable x) -> {
-					updateScreenText();
-				});
-		listVerses.setCellFactory(
-				new Callback<ListView<String>, ListCell<String>>() {
-					@Override
-					public ListCell<String> call(ListView<String> lf) {
-						Text text = new Text();
-						text.setTextOrigin(VPos.TOP);
-						Text num = new Text();
-						num.setTextOrigin(VPos.TOP);
-						StackPane sp = new StackPane(text, num);
-						StackPane.setAlignment(text, Pos.TOP_LEFT);
-						StackPane.setAlignment(num, Pos.TOP_RIGHT);
-						ListCell<String> listCell = new ListCell<String>() {
-							@Override
-							protected void updateItem(String item,
-									boolean empty) {
-								super.updateItem(item, empty);
-								setText(null);
-								if (empty) {
-									setGraphic(null);
-								} else {
-									setGraphic(sp);
-									text.setText(item);
-									num.setText("" + (1 + getIndex()));
-								}
-							}
-						};
-						listCell.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-						return listCell;
-					}
-				});
+        listSongs
+                .setCellFactory(new Callback<ListView<Song>, ListCell<Song>>() {
+                    @Override
+                    public ListCell<Song> call(ListView<Song> param) {
+                        return new ListCell<Song>() {
+                            @Override
+                            protected void updateItem(Song item,
+                                    boolean empty) {
+                                super.updateItem(item, empty);
+                                textProperty().unbind();
+                                if (item == null) {
+                                    setText(null);
+                                } else {
+                                    textProperty()
+                                            .bind(item.toStringProperty());
+                                }
+                            }
+                        };
+                    }
+                });
+        listSongs.getSelectionModel().selectedItemProperty().addListener(x -> {
+            selectedSongProperty()
+                    .set(listSongs.getSelectionModel().getSelectedItem());
+        });
 
-		tgSeparateWithBlankLines.selectedProperty()
-				.addListener(x -> updateScreenText());
+        listVerses.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        listVerses.getSelectionModel().getSelectedItems()
+                .addListener((Observable x) -> {
+                    updateScreenText();
+                });
+        listVerses.setCellFactory(
+                new Callback<ListView<String>, ListCell<String>>() {
+            @Override
+            public ListCell<String> call(ListView<String> lf) {
+                Text text = new Text();
+                text.setTextOrigin(VPos.TOP);
+                Text num = new Text();
+                num.setTextOrigin(VPos.TOP);
+                StackPane sp = new StackPane(text, num);
+                StackPane.setAlignment(text, Pos.TOP_LEFT);
+                StackPane.setAlignment(num, Pos.TOP_RIGHT);
+                ListCell<String> listCell = new ListCell<String>() {
+                    @Override
+                    protected void updateItem(String item,
+                            boolean empty) {
+                        super.updateItem(item, empty);
+                        setText(null);
+                        if (empty) {
+                            setGraphic(null);
+                        } else {
+                            setGraphic(sp);
+                            text.setText(item);
+                            num.setText("" + (1 + getIndex()));
+                        }
+                    }
+                };
+                listCell.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+                return listCell;
+            }
+        });
 
-		tfSearch.textProperty().addListener(x -> {
-			search();
-		});
+        tgSeparateWithBlankLines.selectedProperty()
+                .addListener(x -> updateScreenText());
 
-		tfSearch.addEventHandler(KeyEvent.KEY_PRESSED, e -> {
-			switch (e.getCode()) {
-			case ENTER:
-				tf123.requestFocus();
-				break;
-			case UP:
-			case DOWN: {
-				MultipleSelectionModel<Song> sm = listSongs.getSelectionModel();
-				int i = sm.getSelectedIndex();
-				if (i >= 0) {
-					i += e.getCode() == KeyCode.UP ? -1 : 1;
-					if (i >= 0 && i < listSongs.getItems().size())
-						sm.clearAndSelect(i);
-				}
-				break;
-			}
-			}
-		});
+        tfSearch.textProperty().addListener(x -> {
+            search();
+        });
 
-		btnEdit.disableProperty().bind(selectedSong.isNull());
+        tfSearch.addEventHandler(KeyEvent.KEY_PRESSED, e -> {
+            switch (e.getCode()) {
+                case ENTER:
+                    tf123.requestFocus();
+                    break;
+                case UP:
+                case DOWN: {
+                    MultipleSelectionModel<Song> sm = listSongs.getSelectionModel();
+                    int i = sm.getSelectedIndex();
+                    if (i >= 0) {
+                        i += e.getCode() == KeyCode.UP ? -1 : 1;
+                        if (i >= 0 && i < listSongs.getItems().size()) {
+                            sm.clearAndSelect(i);
+                        }
+                    }
+                    break;
+                }
+            }
+        });
 
-		allSongs.name.set("Vsetky piesne");
-		Bindings.bindContent(allSongs.items, getApp().getSongs());
+        btnEdit.disableProperty().bind(selectedSong.isNull());
 
-		lblShowingSearch.visibleProperty()
-				.bind(tfSearch.textProperty().isNotEmpty());
-		comboPlaylist.visibleProperty()
-				.bind(lblShowingSearch.visibleProperty().not());
-		comboPlaylist.setCellFactory(
-				new Callback<ListView<Playlist>, ListCell<Playlist>>() {
+        allSongs.name.set("Vsetky piesne");
+        Bindings.bindContent(allSongs.items, getApp().getSongs());
 
-					@Override
-					public ListCell<Playlist> call(ListView<Playlist> param) {
-						return new ListCell<Playlist>() {
-							protected void updateItem(Playlist item,
-									boolean empty) {
-								textProperty().unbind();
-								super.updateItem(item, empty);
-								if (item != null)
-									textProperty()
-											.bind(item.toStringProperty());
-							}
-						};
-					}
-				});
-		comboPlaylist.setButtonCell(new ListCell<Playlist>() {
-			protected void updateItem(Playlist item, boolean empty) {
-				textProperty().unbind();
-				super.updateItem(item, empty);
-				if (item != null)
-					textProperty().bind(item.toStringProperty());
-			}
-		});
-		comboPlaylist.itemsProperty().bind(Bindings.createObjectBinding(() -> {
-			ObservableList<Playlist> res = FXCollections
-					.observableArrayList(getApp().playlists);
-			res.add(0, allSongs);
-			return res;
-		}, getApp().playlists));
-		selectedPlaylist
-				.bind(comboPlaylist.getSelectionModel().selectedItemProperty());
-		comboPlaylist.getSelectionModel().select(allSongs);
+        lblShowingSearch.visibleProperty()
+                .bind(tfSearch.textProperty().isNotEmpty());
+        comboPlaylist.visibleProperty()
+                .bind(lblShowingSearch.visibleProperty().not());
+        comboPlaylist.setCellFactory(
+                new Callback<ListView<Playlist>, ListCell<Playlist>>() {
 
-		// btnPlaylist.disableProperty().bind(selectedSong.isNull());
+            @Override
+            public ListCell<Playlist> call(ListView<Playlist> param) {
+                return new ListCell<Playlist>() {
+                    protected void updateItem(Playlist item,
+                            boolean empty) {
+                        textProperty().unbind();
+                        super.updateItem(item, empty);
+                        if (item != null) {
+                            textProperty()
+                                    .bind(item.toStringProperty());
+                        }
+                    }
+                };
+            }
+        });
+        comboPlaylist.setButtonCell(new ListCell<Playlist>() {
+            protected void updateItem(Playlist item, boolean empty) {
+                textProperty().unbind();
+                super.updateItem(item, empty);
+                if (item != null) {
+                    textProperty().bind(item.toStringProperty());
+                }
+            }
+        });
+        comboPlaylist.itemsProperty().bind(Bindings.createObjectBinding(() -> {
+            ObservableList<Playlist> res = FXCollections
+                    .observableArrayList(getApp().playlists);
+            res.add(0, allSongs);
+            return res;
+        }, getApp().playlists));
+        selectedPlaylist
+                .bind(comboPlaylist.getSelectionModel().selectedItemProperty());
+        comboPlaylist.getSelectionModel().select(allSongs);
 
-		getApp().selectedSong.bind(selectedSong);
-	}
+        // btnPlaylist.disableProperty().bind(selectedSong.isNull());
+        getApp().selectedSong.bind(selectedSong);
+    }
 
-	@FXML
-	void search() {
-		String s = tfSearch.getText();
-		if (s.equals("")) {
-			ObservableList<Song> songs = getApp().getSongs();
-			Playlist p = selectedPlaylist.get();
-			if (p != null && p != allSongs)
-				songs = p.items;
-			listSongs.setItems(songs);
-		} else {
-			searchResults.clear();
+    @FXML
+    void search() {
+        String s = tfSearch.getText();
+        if (s.equals("")) {
+            ObservableList<Song> songs = getApp().getSongs();
+            Playlist p = selectedPlaylist.get();
+            if (p != null && p != allSongs) {
+                songs = p.items;
+            }
+            listSongs.setItems(songs);
+        } else {
+            searchResults.clear();
 
-			class SearchResult implements Comparable<SearchResult> {
-				float match;
+            class SearchResult implements Comparable<SearchResult> {
 
-				Song song;
+                float match;
 
-				public int compareTo(SearchResult o) {
-					if (match < o.match)
-						return -1;
-					if (match > o.match)
-						return 1;
-					return 0;
-				}
-			}
+                Song song;
 
-			SearchTerm term = new SearchTerm(s);
-			Vector<SearchResult> result = new Vector<SearchResult>();
+                public int compareTo(SearchResult o) {
+                    if (match < o.match) {
+                        return -1;
+                    }
+                    if (match > o.match) {
+                        return 1;
+                    }
+                    return 0;
+                }
+            }
 
-			for (Song song : getApp().getSongs()) {
-				SearchInfo si = song.getSearchInfo();
-				if (term.matches(si)) {
-					SearchResult sr = new SearchResult();
-					sr.song = song;
-					sr.match = term.match(si);
-					result.add(sr);
-				}
-			}
-			Collections.sort(result, Collections.reverseOrder());
-			for (SearchResult si : result) {
-				searchResults.add(si.song);
-			}
+            SearchTerm term = new SearchTerm(s);
+            Vector<SearchResult> result = new Vector<SearchResult>();
 
-			listSongs.setItems(searchResults);
-			if (searchResults.size() > 0) {
-				listSongs.getSelectionModel().select(0);
-			}
-		}
-	}
+            for (Song song : getApp().getSongs()) {
+                SearchInfo si = song.getSearchInfo();
+                if (term.matches(si)) {
+                    SearchResult sr = new SearchResult();
+                    sr.song = song;
+                    sr.match = term.match(si);
+                    result.add(sr);
+                }
+            }
+            Collections.sort(result, Collections.reverseOrder());
+            for (SearchResult si : result) {
+                searchResults.add(si.song);
+            }
 
-	/**
-	 * @param vs
-	 */
-	public void updateScreenText() {
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < listVerses.getItems().size(); i++) {
-			String v;
-			if (listVerses.getSelectionModel().isSelected(i)) {
-				v = listVerses.getItems().get(i);
-				if (sb.length() > 0) {
-					sb.append(tgSeparateWithBlankLines.isSelected() ? "\n\n"
-							: "\n");
-				}
-				sb.append(v);
-			}
-			// if (sb.length() > 0)
-			getApp().getScreenPrepared().setText(sb.toString());
-		}
-	}
+            listSongs.setItems(searchResults);
+            if (searchResults.size() > 0) {
+                listSongs.getSelectionModel().select(0);
+            }
+        }
+    }
 
-	@FXML
-	public void empty() {
-		listVerses.getSelectionModel().clearSelection();
-	}
+    /**
+     * @param vs
+     */
+    public void updateScreenText() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = -1; i < listVerses.getItems().size(); i++) {
+            String v;
+            if (listVerses.getSelectionModel().isSelected(i)) {
+                v = listVerses.getItems().get(i);
+                if (sb.length() > 0) {
+                    sb.append(tgSeparateWithBlankLines.isSelected() ? "\n\n"
+                            : "\n");
+                }
+                sb.append(v);
+            }
+            // if (sb.length() > 0)
+            getApp().getScreenPrepared().setText(sb.toString());
+        }
+    }
 
-	@FXML
-	public void emptyClick(MouseEvent event) {
-		if (event.getClickCount() == 2) {
-			go();
-		}
-	}
+    @FXML
+    public void empty() {
+        listVerses.getSelectionModel().clearSelection();
+    }
 
-	@FXML
-	public void versesClick(MouseEvent event) {
-		if (event.getClickCount() == 2) {
-			go();
-		}
-	}
+    @FXML
+    public void emptyClick(MouseEvent event) {
+        if (event.getClickCount() == 2) {
+            go();
+        }
+    }
 
-	void go() {
-		getApp().go(Screen.ScreenPart.TEXT);
-	}
+    @FXML
+    public void versesClick(MouseEvent event) {
+        if (event.getClickCount() == 2) {
+            go();
+        }
+    }
 
-	SongEditor openEditor(Song s) {
-		try {
-			FXMLLoader l = new FXMLLoader(
-					getClass().getResource("songeditor.fxml"));
-			Dialog<ButtonType> dlg = l.load();
-			SongEditor editor = l.getController();
+    void go() {
+        getApp().go(Screen.ScreenPart.TEXT);
+    }
 
-			editor.setSong(s);
+    SongEditor openEditor(Song s) {
+        try {
+            FXMLLoader l = new FXMLLoader(
+                    getClass().getResource("songeditor.fxml"));
+            Dialog<ButtonType> dlg = l.load();
+            SongEditor editor = l.getController();
 
-			dlg.initOwner(getApp().stage);
-			Optional<ButtonType> res = dlg.showAndWait();
-			if (res.isPresent() && res.get() == ButtonType.OK) {
-				editor.updateSong();
-				s.save(getApp().dirSongs);
-			}
-			if (!getApp().getSongs().contains(s))
-				getApp().getSongs().add(s);
-			return editor;
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
+            editor.setSong(s);
 
-	@FXML
-	public void editSong() {
-		Song s = selectedSong.get();
-		if (s != null)
-			openEditor(s);
-	}
+            dlg.initOwner(getApp().stage);
+            Optional<ButtonType> res = dlg.showAndWait();
+            if (res.isPresent() && res.get() == ButtonType.OK) {
+                editor.updateSong();
+                s.save(getApp().dirSongs);
+            }
+            if (!getApp().getSongs().contains(s)) {
+                getApp().getSongs().add(s);
+            }
+            return editor;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-	@FXML
-	public void newSong() {
-		openEditor(new Song());
-	}
+    MoreOptions openOptions() {
+        try {
+            FXMLLoader l = new FXMLLoader(
+                    getClass().getResource("moreoptions.fxml"));
+            Dialog<ButtonType> dlg = l.load();
+            MoreOptions EditorOptions = l.getController();
 
-	@FXML
-	public void playlistShow() {
-		try {
-			if (editor == null) {
-				FXMLLoader l = new FXMLLoader(
-						getClass().getResource("playlistseditor.fxml"));
-				l.load();
-				editor = l.getController();
-				editor.outsideSong.bind(selectedSong);
-				editor.dlg.initModality(Modality.NONE);
-				editor.dlg.initOwner(getApp().stage);
-			}
+            dlg.initOwner(getApp().stage);
+            Optional<ButtonType> res = dlg.showAndWait();
+            if (res.isPresent() && res.get() == ButtonType.OK) {
+                EditorOptions.updateOptions();
+            }
+            btnMoreOptions.setSelected(false);
+            
+            int vybratyVers=-1;
+            for (int i = -1; i < listVerses.getItems().size(); i++) {
+                if (listVerses.getSelectionModel().isSelected(i)) {
+                    vybratyVers=i;
+                }
+            }
+            empty();
+            if (vybratyVers>-1) listVerses.getSelectionModel().select(vybratyVers);
+            
+            updateScreenText();
+            //empty();
+            return EditorOptions;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-			editor.dlg.show();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
+    @FXML
+    public void editSong() {
+        Song s = selectedSong.get();
+        if (s != null) {
+            openEditor(s);
+        }
+    }
+
+    @FXML
+    public void newSong() {
+        openEditor(new Song());
+    }
+
+    @FXML
+    public void moreOptions() {
+        openOptions();
+    }
+
+    @FXML
+    public void playlistShow() {
+        try {
+            if (editor == null) {
+                FXMLLoader l = new FXMLLoader(
+                        getClass().getResource("playlistseditor.fxml"));
+                l.load();
+                editor = l.getController();
+                editor.outsideSong.bind(selectedSong);
+                editor.dlg.initModality(Modality.NONE);
+                editor.dlg.initOwner(getApp().stage);
+            }
+
+            editor.dlg.show();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

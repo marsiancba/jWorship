@@ -97,6 +97,11 @@
 			fx:id="cbTextWordWrap"
 			style="-fx-graphic: url('/sk/calvary/worship/wordWrap.png');"
 		/>
+                <ToggleButton
+			fx:id="btnMoreOptions"
+			style="-fx-graphic: url('/sk/calvary/worship/moreOptions.png');"
+                        onAction="#moreOptions"
+		/>
 		<fx:script>
 			var Bindings=javafx.beans.binding.Bindings;
 			var screen=controller.app.screenPrepared;

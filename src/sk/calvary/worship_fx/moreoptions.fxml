@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.collections.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.GridPane?>
+<?import sk.calvary.worship_fx.ImagesListView?>
+
+<Dialog xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.calvary.worship_fx.MoreOptions"
+        fx:id="dlg" title="Písmo">
+    <dialogPane>
+        <DialogPane prefWidth="500" prefHeight="600">
+            <content>
+                <VBox style="-fx-padding: 5 5 5 5" spacing="5">
+                    <TitledPane collapsible="false" text="Písmo">
+                        <VBox style="-fx-padding: 5 5 5 5" spacing="5">
+                            <ColorPicker  fx:id="ColorPicker1" onAction="#ColorPicker1"/>
+                            <CheckBox text="CapsLock" GridPane.rowIndex="2" GridPane.columnIndex="0" 
+                                      fx:id="boxCapsLock" onAction="#CapsLock"/>
+                            <ComboBox fx:id="comboFont" onAction="#FontName">
+                                <items>
+                                    <FXCollections fx:factory="observableArrayList">
+                                        <String fx:value="Calibri" />
+                                        <String fx:value="Bold" />
+                                        <String fx:value="Italic" />
+                                        <String fx:value="Comfortaa" />
+                                        <String fx:value="Cocogoose" />
+                                        <String fx:value="SpecialElite" />
+                                        <String fx:value="DryBrush" />
+                                    </FXCollections>
+                                </items>
+                            </ComboBox>
+                        </VBox>
+                    </TitledPane>   
+                    <TitledPane collapsible="false" text="Ukážka"> 
+                        <HBox spacing="0" alignment="CENTER" 
+                              style="-fx-background-color: black;">
+                            <Label fx:id="Text"/>
+                        </HBox>
+                    </TitledPane> 
+                    
+                </VBox>
+            </content>
+            <ButtonType fx:constant="OK" />
+            <ButtonType fx:constant="CANCEL" />
+        </DialogPane>
+    </dialogPane>
+</Dialog>
+
