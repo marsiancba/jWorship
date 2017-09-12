@@ -22,6 +22,7 @@ import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import static javax.swing.JComponent.WHEN_FOCUSED;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
