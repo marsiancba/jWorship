@@ -50,7 +50,7 @@ import sk.calvary.worship_fx.vlc.VLCMediaPlayer;
 import sk.calvary.worship_fx.vlc.VLCMediaView;
 
 public class App extends Application implements Initializable {
-	public static final String VERSION = "4.2";
+	public static final String VERSION = "4.2.1";
 
 	public static App app;
 	private Parent root;
