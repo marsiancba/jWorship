@@ -11,6 +11,7 @@
 <?import javafx.scene.Group?>
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ColorPicker?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.GridPane?>
@@ -25,6 +26,7 @@
 	<TitledPane collapsible="false" text="Text">
 		<VBox style="-fx-padding: 5 5 5 5" spacing="5">
 			<CheckBox text="Tien" fx:id="cbShadow"></CheckBox>
+                        <CheckBox text="CapsLock" fx:id="cbCapsLock"></CheckBox>
 			<CheckBox text="Zalamovat" fx:id="cbTextWordWrap"></CheckBox>
 			<HBox spacing="5" alignment="CENTER_LEFT">
 				<Label text="Velkost pisma:" prefWidth="150"/>
@@ -39,6 +41,10 @@
 				</ToggleButtonND>
 				<Label fx:id="lbTextFontHeight" />
 			</HBox>
+                        <HBox spacing="5" alignment="CENTER_LEFT">
+                            <Label text="Farba pisma:" prefWidth="150"/>
+                            <ColorPicker fx:id="cpTextColor" />
+                        </HBox>
 		</VBox>
 	</TitledPane>
 	<TitledPane collapsible="false" text="Pozadie">
@@ -110,7 +116,13 @@
 		screen=controller.app.screenPrepared;
 		Bindings.bindBidirectional(
 		cbShadow.selectedProperty(), screen.textShadowProperty());
-
+        
+                Bindings.bindBidirectional(
+		cbCapsLock.selectedProperty(), screen.textCapsLockProperty());
+        
+                Bindings.bindBidirectional(
+		cpTextColor.valueProperty(), screen.textColorProperty());
+        
 		Bindings.bindBidirectional(
 		cbTextWordWrap.selectedProperty(),
 		screen.textWordWrapProperty());

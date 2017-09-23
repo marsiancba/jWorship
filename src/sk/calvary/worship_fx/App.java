@@ -69,8 +69,13 @@ public class App extends Application implements Initializable {
 
 	private final ObservableList<Song> songs = FXCollections
 			.observableArrayList();
+        
+        private final ObservableList<FontX> fonts = FXCollections
+			.observableArrayList();
 
 	final ObjectProperty<Song> selectedSong = new SimpleObjectProperty<>();
+	
+        FontX selectedFont = null;
 
 	final ObservableList<MediaHistoryItem> mediaHistoryItems = FXCollections
 			.observableArrayList();
@@ -192,6 +197,7 @@ public class App extends Application implements Initializable {
 
 	File dirSongs = new File("songs");
 	File dirPictures = new File("pictures");
+	File dirFonts = new File("fonts");
 
 	void loadSongs() {
 		if (dirSongs.exists()) {
@@ -208,9 +214,29 @@ public class App extends Application implements Initializable {
 			}
 		}
 	}
+        
+        void loadFonts() {
+            if (dirFonts.exists()) {
+                String[] l = dirFonts.list();
+			for (int i = 0; i < l.length; i++) {
+				File f = new File(dirFonts, l[i]);
+				if (f.isFile()) {
+					try {
+						fonts.add(FontX.load(f));
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+            }
+        }
 
 	public ObservableList<Song> getSongs() {
 		return songs;
+	}
+        
+        public ObservableList<FontX> getFonts() {
+		return fonts;
 	}
 
 	@Override
@@ -223,6 +249,7 @@ public class App extends Application implements Initializable {
 		try {
 			loadSettings();
 			loadSongs(); // musi byt pred loadPlaylists!!
+                        loadFonts();
 
 			
 			loadHistory();
