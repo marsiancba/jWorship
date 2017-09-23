@@ -13,6 +13,7 @@
 <?import javafx.scene.control.TextArea?>
 <?import sk.calvary.worship_fx.ImagesListView?>
 <?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.control.CheckBox?>
 
 <Dialog xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.calvary.worship_fx.SongEditor"
 	fx:id="dlg" title="Piesen">
@@ -34,8 +35,12 @@
 						GridPane.hgrow="ALWAYS" fx:id="tfAuthor" />
 					<HBox spacing="5" GridPane.rowIndex="3" GridPane.columnIndex="0"
 						GridPane.vgrow="ALWAYS" GridPane.columnSpan="2">
-						<TextArea HBox.hgrow="ALWAYS" style="-fx-font-size: 150%"
+                                                <VBox spacing="5" HBox.hgrow="ALWAYS">
+						<TextArea VBox.Vgrow="ALWAYS" style="-fx-font-size: 150%"
 							fx:id="taVerses" />
+                                                <CheckBox text="CapsLock" 
+                                                fx:id="boxCapsLock" onAction="#CapsLock" />
+                                                </VBox>
 						<VBox spacing="5" HBox.hgrow="ALWAYS" minWidth="150">
 							<ImagesListView VBox.vgrow="ALWAYS"
 								fx:id="listBackgrounds" />

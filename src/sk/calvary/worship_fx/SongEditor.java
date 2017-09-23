@@ -15,6 +15,7 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 
 public class SongEditor implements Initializable {
 
@@ -30,7 +31,7 @@ public class SongEditor implements Initializable {
 	Song song;
 	@FXML
 	TextArea taVerses;
-
+        String Text;
 	final ObservableList<String> backgrounds = FXCollections
 			.observableArrayList();
 
@@ -40,6 +41,9 @@ public class SongEditor implements Initializable {
 	Button btnBackgroundAdd;
 	@FXML
 	Button btnBackgroundRemove;
+        @FXML
+	CheckBox boxCapsLock;
+        
 	private StringProperty preparedBackground;
 	private StringProperty selectedBackground;
 
@@ -57,7 +61,7 @@ public class SongEditor implements Initializable {
 
 		btnBackgroundAdd.disableProperty().bind(preparedBackground.isEmpty());
 		btnBackgroundRemove.disableProperty().bind(selectedBackground.isEmpty());
-	}
+        }
 
 	void setSong(Song s) {
 		song = s;
@@ -85,6 +89,17 @@ public class SongEditor implements Initializable {
 			backgrounds.add(bg);
 	}
 
+        @FXML
+	public void CapsLock() {
+            if (boxCapsLock.isSelected()){
+                Text = taVerses.getText();
+                taVerses.setText(Text.toUpperCase());
+            }
+            if (!boxCapsLock.isSelected()){
+                taVerses.setText(Text);
+            }
+	}
+        
 	@FXML
 	public void backgroundRemove() {
 		backgrounds.remove(
