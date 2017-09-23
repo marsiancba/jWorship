@@ -3,6 +3,7 @@
  */
 package sk.calvary.worship_fx;
 
+import java.awt.Font;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,6 +23,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.layout.Region;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
@@ -85,6 +87,27 @@ public class Screen implements Observable {
 	public boolean isTextShadow() {
 		return textShadow.get();
 	}
+        
+        private final BooleanProperty textCapsLock = new SimpleBooleanProperty(this,
+			"textCapsLock", false);
+
+	public BooleanProperty textCapsLockProperty() {
+		return textCapsLock;
+	}
+
+	public boolean isTextCapsLock() {
+		return textCapsLock.get();
+	}
+        
+        private ObjectProperty<Color> textColor = new SimpleObjectProperty<Color>(this, "textColor", Color.WHITE);
+
+        public Color getTextColor() {
+            return textColor.get();
+        }
+
+        public ObjectProperty<Color> textColorProperty() {
+            return textColor;
+        }
 
 	private final BooleanProperty textWordWrap = new SimpleBooleanProperty(this,
 			"textWordWrap", true);
@@ -192,10 +215,11 @@ public class Screen implements Observable {
 
 	public List<Property<?>> listProperties() {
 		return Arrays.asList(new Property<?>[] { //
+				//
 				backgroundFillScreen, backgroundMedia, //
 				textAlign, textAreaPart, textFit, textWordWrap, text,
-				textShadow, textFontHeight, //
-				height, //
+				textShadow, textFontHeight, textCapsLock,//
+			        height, textColor,//
 		});
 	}
 
@@ -264,6 +288,7 @@ public class Screen implements Observable {
 	public void serialize(JSONSerializer s) {
 		s.serialize(textWordWrap);
 		s.serialize(textShadow);
+                s.serialize(textCapsLock);
 		s.serialize(textFit);
 		s.serialize(height);
 		s.serialize(textFontHeight);

@@ -42,6 +42,9 @@ import javafx.stage.Modality;
 import javafx.util.Callback;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.RadioMenuItem;
+import javafx.scene.control.ToggleGroup;
 
 public class SongsPanel implements Initializable {
 
@@ -51,18 +54,19 @@ public class SongsPanel implements Initializable {
 
     @FXML
     ListView<Song> listSongs;
+    
+    @FXML
+    MenuButton menuFont;
 
     @FXML
     ListView<String> listVerses;
-
+    
     final ObjectProperty<Song> selectedSong = new SimpleObjectProperty<Song>(
             null);
 
     @FXML
     ToggleButton tgSeparateWithBlankLines;
 
-    @FXML
-    ToggleButton btnMoreOptions;
     @FXML
     TextField tfSearch;
 
@@ -241,7 +245,7 @@ public class SongsPanel implements Initializable {
         selectedPlaylist
                 .bind(comboPlaylist.getSelectionModel().selectedItemProperty());
         comboPlaylist.getSelectionModel().select(allSongs);
-
+        
         // btnPlaylist.disableProperty().bind(selectedSong.isNull());
         getApp().selectedSong.bind(selectedSong);
     }
@@ -367,37 +371,6 @@ public class SongsPanel implements Initializable {
         }
     }
 
-    MoreOptions openOptions() {
-        try {
-            FXMLLoader l = new FXMLLoader(
-                    getClass().getResource("moreoptions.fxml"));
-            Dialog<ButtonType> dlg = l.load();
-            MoreOptions EditorOptions = l.getController();
-
-            dlg.initOwner(getApp().stage);
-            Optional<ButtonType> res = dlg.showAndWait();
-            if (res.isPresent() && res.get() == ButtonType.OK) {
-                EditorOptions.updateOptions();
-            }
-            btnMoreOptions.setSelected(false);
-            
-            int vybratyVers=-1;
-            for (int i = -1; i < listVerses.getItems().size(); i++) {
-                if (listVerses.getSelectionModel().isSelected(i)) {
-                    vybratyVers=i;
-                }
-            }
-            empty();
-            if (vybratyVers>-1) listVerses.getSelectionModel().select(vybratyVers);
-            
-            updateScreenText();
-            //empty();
-            return EditorOptions;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     @FXML
     public void editSong() {
         Song s = selectedSong.get();
@@ -405,15 +378,40 @@ public class SongsPanel implements Initializable {
             openEditor(s);
         }
     }
+    
+    @FXML
+    public void MenuButtonMouseEntered() {
+        if (getApp().getFonts().size() != menuFont.getItems().size() - 1) {
+            ToggleGroup AllFonts = new ToggleGroup();
+            RadioMenuItem[] radioItems = new RadioMenuItem[getApp().getFonts().size() + 1];
+            radioItems[0] = new RadioMenuItem("Predvolený font");
+            radioItems[0].setToggleGroup(AllFonts);
+            radioItems[0].setSelected(true);
+            menuFont.getItems().add(radioItems[0]);
+            menuFont.getItems().get(0).setStyle("-fx-font-weight: bold;");
+
+            for (int i = 0; i < getApp().getFonts().size(); i++) {
+                radioItems[i + 1] = new RadioMenuItem(getApp().getFonts().get(i).toString());
+                radioItems[i + 1].setToggleGroup(AllFonts);
+                menuFont.getItems().add(radioItems[i + 1]);
+            }
+
+            AllFonts.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
+                for (int i=1; i<menuFont.getItems().size(); i++){
+                    if (newValue == radioItems[i]) {
+                        getApp().selectedFont=getApp().getFonts().get(i-1);
+                    }
+                }
+                if (newValue == radioItems[0]) getApp().selectedFont=null;
+                updateScreenText();
+            });
+            
+        }
+    }
 
     @FXML
     public void newSong() {
         openEditor(new Song());
-    }
-
-    @FXML
-    public void moreOptions() {
-        openOptions();
     }
 
     @FXML

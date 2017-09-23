@@ -3,6 +3,9 @@
  */
 package sk.calvary.worship_fx;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
@@ -38,8 +41,6 @@ public class ScreenView extends Pane implements InvalidationListener {
     private Node transitionBackground;
 
     private boolean invalid = false;
-
-    private static Font myFont = Font.font("Calibri", 100);
 
     App getApp() {
         return App.app;
@@ -166,12 +167,17 @@ public class ScreenView extends Pane implements InvalidationListener {
             double maxWidth = textParent.getWidth();
             double maxHeight = textParent.getHeight();
             for (int i = 0;; i++) {
-                text.setFill(MoreOptions.getTextColor());
-                if (MoreOptions.isCapsLock()) {
+                text.setFill(screen.getTextColor());
+                if (screen.isTextCapsLock()) {
                     text.setText(text.getText().toUpperCase());
                 }
-                text.setFont(Font.font(myFont.getName(),fontSize));
-
+                text.setFont(new Font(fontSize));
+                if (getApp().selectedFont != null){
+                    if (getApp().selectedFont.isFontLoaded()){
+                        text.setFont(new Font(getApp().selectedFont.getFont().getName(), fontSize));
+                    }
+                }
+                
                 if (i >= 300) {
                     break;
                 }
@@ -309,11 +315,5 @@ public class ScreenView extends Pane implements InvalidationListener {
         }
         invalid = true;
         Platform.runLater(this::updateScreen);
-    }
-
-    public static void setFont(String FontName) {
-        myFont = Font.loadFont(ScreenView.class.getResource(
-                "/sk/calvary/worship/" + FontName
-                + ".ttf").toExternalForm(), 30);
     }
 }
