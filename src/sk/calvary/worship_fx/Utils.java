@@ -170,7 +170,7 @@ public class Utils {
 	}
 
 	static final Set<String> videExtensions = new HashSet<String>(
-			Arrays.asList(new String[] { "mp4", "mpg", "webm", "wmv" }));
+			Arrays.asList(new String[] { "mp4", "mpg", "webm" }));
 
 	public static boolean isVideoFile(File f) {
 		return videExtensions.contains(getFileExtension(f).toLowerCase());
