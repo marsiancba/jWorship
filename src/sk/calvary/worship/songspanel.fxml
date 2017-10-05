@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<?import sk.calvary.worship_fx.*?>
+
+
+<?language javascript?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.Label?>
+<?import javafx.collections.*?>
+<?import java.lang.*?>
+
+<GridPane xmlns:fx="http://javafx.com/fxml/1"
+	fx:controller="sk.calvary.worship_fx.SongsPanel" 
+	fx:id="root"
+	hgap="5" 
+	vgap="5"
+	style="-fx-padding: 5 0 5 0"
+	>
+    <columnConstraints>
+        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" percentWidth="50.0" prefWidth="100.0" />
+        <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" percentWidth="50.0" prefWidth="100.0" />
+    </columnConstraints>	
+	<ComboBox 
+		fx:id="comboPlaylist"
+		GridPane.rowIndex="0"
+		GridPane.columnIndex="0"
+		maxWidth="1000"
+		onAction="#search"
+		/>
+	<Label fx:id="lblShowingSearch"
+		text="Vysledky hladania:"
+		GridPane.rowIndex="0"
+		GridPane.columnIndex="0"
+		style="-fx-padding: 0 5 0 5"
+		alignment="CENTER_LEFT"
+		/>
+	<HBox spacing="5"
+		alignment="CENTER_RIGHT"
+		styleClass="button-bar"
+		GridPane.rowIndex="0"
+		GridPane.columnIndex="1"
+		GridPane.columnSpan="1"
+		style="-fx-padding: 0 5 0 0"
+		>
+		<ToggleButton fx:id="tgSeparateWithBlankLines"
+			style="-fx-graphic: url('/sk/calvary/worship/separateWithBlankLines.png');"
+			selected="true"
+		/>
+		<HBox spacing="2">
+		    <fx:define>
+		        <ToggleGroupValue fx:id="tgTextAreaPart"/>
+		    </fx:define>											
+			<ToggleButtonND toggleGroup="$tgTextAreaPart"
+				style="-fx-graphic: url('/sk/calvary/worship/textPartAll.png');">
+				<userData><Screen.TextAreaPart fx:constant="ALL"/></userData>
+			</ToggleButtonND>
+			<ToggleButtonND toggleGroup="$tgTextAreaPart"
+				style="-fx-graphic: url('/sk/calvary/worship/textPartTop.png');">
+				<userData><Screen.TextAreaPart fx:constant="TOP"/></userData>
+			</ToggleButtonND>
+			<ToggleButtonND toggleGroup="$tgTextAreaPart"
+				style="-fx-graphic: url('/sk/calvary/worship/textPartBottom.png');">
+				<userData><Screen.TextAreaPart fx:constant="BOTTOM"/></userData>
+			</ToggleButtonND>
+			<ToggleButtonND toggleGroup="$tgTextAreaPart"
+				style="-fx-graphic: url('/sk/calvary/worship/textPartTop2Thirds.png');">
+				<userData><Screen.TextAreaPart fx:constant="TOP_2THIRDS"/></userData>
+			</ToggleButtonND>
+		</HBox>
+		<HBox spacing="2">
+		    <fx:define>
+		        <ToggleGroupValue fx:id="tgTextAlign"/>
+		    </fx:define>											
+			<ToggleButtonND toggleGroup="$tgTextAlign"
+				style="-fx-graphic: url('/sk/calvary/worship/alignLeft.png');">
+				<userData><Screen.Align fx:constant="LEFT"/></userData>
+			</ToggleButtonND>
+			<ToggleButtonND toggleGroup="$tgTextAlign"
+				style="-fx-graphic: url('/sk/calvary/worship/alignCenter.png');">
+				<userData><Screen.Align fx:constant="CENTER"/></userData>
+			</ToggleButtonND>
+			<ToggleButtonND toggleGroup="$tgTextAlign"
+				style="-fx-graphic: url('/sk/calvary/worship/alignRight.png');">
+				<userData><Screen.Align fx:constant="RIGHT"/></userData>
+			</ToggleButtonND>
+		</HBox>
+		<ToggleButton
+			fx:id="btnShadow"
+			style="-fx-graphic: url('/sk/calvary/worship/shadow.png');"
+		/>
+                <ToggleButton
+			fx:id="btnCapsLock"
+			style="-fx-graphic: url('/sk/calvary/worship/capsLock.png');"
+		/>
+		<ToggleButton
+			fx:id="cbTextWordWrap"
+			style="-fx-graphic: url('/sk/calvary/worship/wordWrap.png');"
+		/>
+                <ColorPicker 
+                        minWidth="40.0"
+                        prefWidth="40.0"
+                        fx:id="cpTextColor" 
+                        style="-fx-color-label-visible: false;" 
+                />
+                <MenuButton
+                        minWidth="40"
+                        prefWidth="40.0"
+                        fx:id="menuFont"
+                        text=""
+                        style="-fx-graphic: url('/sk/calvary/worship/font.png');"
+                        onMouseEntered="#MenuButtonMouseEntered"
+                />
+		<fx:script>
+			var Bindings=javafx.beans.binding.Bindings;
+			var screen=controller.app.screenPrepared;
+			Bindings.bindBidirectional(
+				tgTextAreaPart.valueProperty(), screen.textAreaPartProperty());
+			Bindings.bindBidirectional(
+				tgTextAlign.valueProperty(), screen.textAlignProperty());
+			Bindings.bindBidirectional(
+				btnShadow.selectedProperty(), screen.textShadowProperty());
+                        Bindings.bindBidirectional(
+                                cpTextColor.valueProperty(), screen.textColorProperty());
+                        Bindings.bindBidirectional(
+				btnCapsLock.selectedProperty(), screen.textCapsLockProperty());
+			Bindings.bindBidirectional(
+				cbTextWordWrap.selectedProperty(), screen.textWordWrapProperty());
+		</fx:script>
+	</HBox>
+	<ListView fx:id="listSongs"
+		GridPane.rowIndex="1"
+		GridPane.columnIndex="0"
+		GridPane.hgrow="ALWAYS" 
+		GridPane.vgrow="ALWAYS"
+		items="$controller.app.songs" 
+		/>
+	<ListView fx:id="listVerses"
+		GridPane.rowIndex="1"
+		GridPane.columnIndex="1"
+		GridPane.hgrow="ALWAYS" 
+		GridPane.vgrow="ALWAYS" 
+		onMouseClicked="#versesClick"
+		/>
+	<HBox spacing="5"
+		GridPane.rowIndex="2"
+		GridPane.columnIndex="0"
+		GridPane.hgrow="ALWAYS" 
+	>
+		<TextField fx:id="tfSearch" id="tfSearch" HBox.hgrow="ALWAYS" />
+		<Button fx:id="tf123" text="123"/>
+	</HBox>
+	<HBox spacing="15"
+		alignment="CENTER_RIGHT"
+		GridPane.rowIndex="2"
+		GridPane.columnIndex="1"
+		GridPane.hgrow="ALWAYS" 
+		style="-fx-padding: 0 5 0 0"
+	>
+		<HBox alignment="CENTER_LEFT">
+			<Button text="Playlisty" fx:id="btnPlaylist" onAction="#playlistShow"/>
+			<!-- styleClass="button-bar"  style="-fx-graphic: url('/sk/calvary/worship/playlist.png');" -->
+		</HBox>
+		<HBox HBox.hgrow="ALWAYS"/>
+		<Button text="Edituj" onAction="#editSong" fx:id="btnEdit"/>
+		<Button text="Nova" onAction="#newSong" />
+		<Button text="Prazdny text" onAction="#empty" onMouseClicked="#emptyClick" />
+	</HBox>
+</GridPane>
