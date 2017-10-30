@@ -16,9 +16,9 @@ import javafx.scene.text.Font;
 
 public class FontX {
 	final StringProperty title = new SimpleStringProperty("title");
-        
-        private Font LoadedFont;
-        
+
+	private Font LoadedFont;
+
 	public FontX() {
 		title.addListener(x -> invalidate());
 	}
@@ -29,40 +29,42 @@ public class FontX {
 
 	public static FontX load(File f) throws IOException {
 		String ext = Utils.getFileExtension(f).toLowerCase();
-                switch (ext) {
-                    case "ttf":
-                    case "otf":{
-                        FontX font = new FontX();
+		switch (ext) {
+		case "ttf":
+		case "otf": {
+			FontX font = new FontX();
 			font.title.set(Utils.getFileName(f));
-                        try {
-                            font.LoadedFont = Font.loadFont(new FileInputStream(new File(f.getAbsolutePath())), 30);
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
-                        }
-                        return font;}
-                    default:{
-                        throw new IllegalArgumentException();
-                   }
-                }
+			try {
+				font.LoadedFont = Font.loadFont(
+						new FileInputStream(new File(f.getAbsolutePath())), 30);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
+			return font;
+		}
+		default: {
+			throw new IllegalArgumentException();
+		}
+		}
 	}
 
 	private final StringBinding toString = Bindings
 			.createStringBinding(this::toString, title);
-        
-        @Override
-        public String toString() {
+
+	@Override
+	public String toString() {
 		return title.get();
 	}
 
 	public StringBinding toStringProperty() {
 		return toString;
 	}
-        
-        public Boolean isFontLoaded() {
-            return (LoadedFont != null);
-        }
-        
-        public Font getFont() {
-            return LoadedFont;
-        }
+
+	public Boolean isFontLoaded() {
+		return (LoadedFont != null);
+	}
+
+	public Font getFont() {
+		return LoadedFont;
+	}
 }

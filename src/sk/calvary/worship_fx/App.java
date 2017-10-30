@@ -581,7 +581,7 @@ public class App extends Application implements Initializable {
 		s.serializeObjectList("playlists", playlists,
 				Playlist::new, Playlist::serialize);
 	}
-	
+
 	Song getSongByFileName(String name) {
 		if (name == null || name.equals(""))
 			return null;
