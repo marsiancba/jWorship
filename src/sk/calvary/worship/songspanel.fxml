@@ -55,7 +55,7 @@
 			style="-fx-graphic: url('/sk/calvary/worship/separateWithBlankLines.png');"
 			selected="true"
 		/>
-		<HBox spacing="2" alignment="CENTER">
+		<HBox spacing="2">
 		    <fx:define>
 		        <ToggleGroupValue fx:id="tgTextAreaPart"/>
 		    </fx:define>											
@@ -76,7 +76,7 @@
 				<userData><Screen.TextAreaPart fx:constant="TOP_2THIRDS"/></userData>
 			</ToggleButtonND>
 		</HBox>
-		<HBox spacing="2" alignment="CENTER">
+		<HBox spacing="2">
 		    <fx:define>
 		        <ToggleGroupValue fx:id="tgTextAlign"/>
 		    </fx:define>											
@@ -97,7 +97,7 @@
 			fx:id="btnShadow"
 			style="-fx-graphic: url('/sk/calvary/worship/shadow.png');"
 		/>
-        <ToggleButton
+                <ToggleButton
 			fx:id="btnCapsLock"
 			style="-fx-graphic: url('/sk/calvary/worship/capsLock.png');"
 		/>
@@ -112,7 +112,10 @@
                         style="-fx-color-label-visible: false;" 
                 />
                 <MenuButton
+                        minWidth="40"
+                        prefWidth="40.0"
                         fx:id="menuFont"
+                        text=""
                         style="-fx-graphic: url('/sk/calvary/worship/font.png');"
                         onMouseEntered="#MenuButtonMouseEntered"
                 />
