@@ -461,6 +461,7 @@ public class App extends Application implements Initializable {
 		projectorStage.setScene(new Scene(screenViewProjector));
 		projectorStage.setX(monitor.getVisualBounds().getMinX());
 		projectorStage.setY(monitor.getVisualBounds().getMinY());
+		projectorStage.setFullScreenExitHint(""); //predvolene je "Press ESC to exit Full-Screen mode"
 		if (mode == ProjectorModes.WINDOW) {
 			projectorStage.setWidth(640);
 			projectorStage.setHeight(480);
