@@ -363,6 +363,11 @@ public final class Screen extends Freezable implements Cloneable {
 		this.height = height;
 		changeSupport.firePropertyChange("height", new Float(old), new Float(
 				height));
+		
+		if (old != height){
+			app.generalSettings.put(app.SETTING_ASPECT_RATIO, String.valueOf(height));
+			app.saveAll();
+		}
 	}
 
 	public AttributedString getText() {
