@@ -1,0 +1,38 @@
+{
+  "name": "jworship",
+  "version": "4.2.1",
+  "description": "Worship presentation software – Electron/TypeScript migration of jWorship",
+  "main": "dist/main/main.js",
+  "scripts": {
+    "build": "tsc && cp electron-src/renderer/index.html electron-src/renderer/style.css dist/renderer/",
+    "dev": "npm run build && electron .",
+    "dev:web": "npm run build && node dist/dev-server.js",
+    "start": "electron .",
+    "lint": "eslint 'electron-src/**/*.ts'",
+    "test": "echo \"No tests configured yet\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marsiancba/jWorship.git"
+  },
+  "keywords": [
+    "worship",
+    "presentation",
+    "electron",
+    "church"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/marsiancba/jWorship/issues"
+  },
+  "homepage": "https://github.com/marsiancba/jWorship#readme",
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "@typescript-eslint/eslint-plugin": "^8.58.1",
+    "@typescript-eslint/parser": "^8.58.1",
+    "electron": "^41.2.0",
+    "eslint": "^10.2.0",
+    "typescript": "^6.0.2"
+  }
+}

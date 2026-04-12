@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'" />
+  <title>jWorship</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>jWorship <span class="version">4.2</span></h1>
+      <input type="text" id="search" placeholder="Hľadať pieseň..." />
+    </header>
+    <main>
+      <aside id="song-list">
+        <h2>Piesne</h2>
+        <ul id="songs"></ul>
+      </aside>
+      <section id="song-view">
+        <div id="song-title">Vyber pieseň zo zoznamu</div>
+        <div id="verses"></div>
+      </section>
+      <section id="live-preview">
+        <h2>Projekcia</h2>
+        <div id="projector-preview">
+          <div id="projector-text"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script type="module" src="renderer.js"></script>
+</body>
+</html>
