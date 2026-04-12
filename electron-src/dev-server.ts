@@ -1,11 +1,7 @@
 import * as http from "http";
 import * as fs from "fs";
 import * as path from "path";
-import { fileURLToPath } from "url";
-import { SongStore } from "./main/songStore.js";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { SongStore } from "./main/songStore";
 
 const PORT = 3000;
 const DIST_DIR = path.join(__dirname, "renderer");

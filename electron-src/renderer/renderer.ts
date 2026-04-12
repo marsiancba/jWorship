@@ -1,21 +1,3 @@
-interface JWorshipAPI {
-  listSongs(): Promise<string[]>;
-  loadSong(fileName: string): Promise<{
-    fileName: string;
-    title: string;
-    author: string;
-    verses: string[];
-  } | null>;
-}
-
-export {};
-
-declare global {
-  interface Window {
-    api: JWorshipAPI;
-  }
-}
-
 const songList = document.getElementById("songs") as HTMLUListElement;
 const songTitle = document.getElementById("song-title") as HTMLDivElement;
 const versesContainer = document.getElementById("verses") as HTMLDivElement;
@@ -23,6 +5,18 @@ const projectorText = document.getElementById("projector-text") as HTMLDivElemen
 const searchInput = document.getElementById("search") as HTMLInputElement;
 
 let allSongs: string[] = [];
+let songApi: JWorshipAPI;
+
+function getApi(): JWorshipAPI {
+  if (window.api) {
+    return window.api;
+  }
+  return {
+    listSongs: () => fetch("/api/songs").then((r) => r.json()),
+    loadSong: (fileName: string) =>
+      fetch(`/api/songs/${encodeURIComponent(fileName)}`).then((r) => r.json()),
+  };
+}
 
 function displayNameFromFile(fileName: string): string {
   return fileName.replace(/\.(json|sng|txt)$/, "");
@@ -48,7 +42,7 @@ async function selectSong(fileName: string, element: HTMLLIElement): Promise<voi
   document.querySelectorAll("#songs li.active").forEach((el) => el.classList.remove("active"));
   element.classList.add("active");
 
-  const song = await window.api.loadSong(fileName);
+  const song = await songApi.loadSong(fileName);
   if (!song) {
     songTitle.textContent = "Chyba pri načítaní piesne";
     versesContainer.innerHTML = "";
@@ -85,22 +79,10 @@ searchInput.addEventListener("input", () => {
   renderSongList(searchInput.value);
 });
 
-function getApi(): JWorshipAPI {
-  if (window.api) {
-    return window.api;
-  }
-  return {
-    listSongs: () => fetch("/api/songs").then((r) => r.json()),
-    loadSong: (fileName: string) =>
-      fetch(`/api/songs/${encodeURIComponent(fileName)}`).then((r) => r.json()),
-  };
-}
-
 async function init(): Promise<void> {
-  const api = getApi();
-  window.api = api;
+  songApi = getApi();
   try {
-    allSongs = await api.listSongs();
+    allSongs = await songApi.listSongs();
     renderSongList("");
   } catch {
     songTitle.textContent = "jWorship – Vitajte";

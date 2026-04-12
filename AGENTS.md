@@ -29,27 +29,30 @@ jWorship is a church worship presentation desktop application originally built i
 ## Cursor Cloud specific instructions
 
 ### Commands
-- **Build:** `npm run build` — compiles TypeScript and copies static assets to `dist/`
-- **Lint:** `npm run lint` — runs ESLint on `electron-src/**/*.ts`
+- **Build:** `npm run build`
+- **Lint:** `npm run lint`
+- **Dev (Electron):** `npm run dev` — builds then launches the native Electron desktop app
 - **Dev (web):** `npm run dev:web` — builds then starts a local HTTP server at http://localhost:3000
-- **Dev (Electron):** `npm run dev` — builds then launches Electron (requires Electron binary; see caveat below)
 - **Test:** `npm test`
 
-### Electron binary download caveat
-Electron's postinstall script downloads a ~110 MB binary from `release-assets.githubusercontent.com`. If that domain is blocked by egress restrictions, the binary won't download and `electron .` / `npm run dev` will fail. Workarounds:
-1. Add `release-assets.githubusercontent.com` to the network egress allowlist.
-2. Use `npm run dev:web` which serves the renderer in any browser without the Electron binary.
-3. Set `ELECTRON_SKIP_BINARY_DOWNLOAD=1` when installing to skip the download, then manually place the binary in `node_modules/electron/dist/`.
+### Running Electron in this environment
+- Always pass `--no-sandbox` when running Electron: `DISPLAY=:1 npx electron . --no-sandbox`
+- DBus errors in the log (`Failed to connect to the bus`) are cosmetic and harmless in a container/VM.
+- SSL handshake errors for background Chromium network calls are caused by egress restrictions and are harmless.
+- The `npm run dev` script handles the `--no-sandbox` flag is not included in the package.json script — run `DISPLAY=:1 npx electron . --no-sandbox` directly, or use `npm run dev:web` for browser-based dev.
 
-After running `npm install --ignore-scripts`, you can attempt `node node_modules/electron/install.js` to download the binary separately.
+### Renderer code gotcha
+- The renderer runs in Electron's sandboxed browser context with `contextIsolation: true` and `nodeIntegration: false`.
+- Do NOT use `export` statements or ES module syntax in renderer `.ts` files — TypeScript compiles to CommonJS which uses `exports` (undefined in browser context).
+- Do NOT declare global variables that collide with names exposed by the preload script (e.g., `api` is exposed via `contextBridge`). Use unique names like `songApi`.
+- Type declarations for `window.api` live in `electron-src/renderer/global.d.ts`.
 
 ### Node.js / npm
-- Node.js v22 is available via nvm.
-- `npm`, `pnpm`, and `yarn` are installed. The project uses npm (see `package-lock.json`).
+- Node.js v22 via nvm. Project uses npm (`package-lock.json`).
+- Electron binary (~110 MB) downloads from `release-assets.githubusercontent.com` during `npm install`. If that domain is blocked, use `npm install --ignore-scripts` and then `node node_modules/electron/install.js` separately.
 
 ### Display / GUI testing
-- A virtual display is available for GUI testing via the `computerUse` subagent.
-- Electron apps require the `--no-sandbox` flag in this environment.
+- Virtual display (Xtigervnc) is on DISPLAY=:1.
 - For web-mode dev (`npm run dev:web`), open http://localhost:3000 in Chrome.
 
 ### Project structure
@@ -59,6 +62,7 @@ electron-src/
     main.ts      # App entry, window creation, IPC handlers
     songStore.ts # Song file loading (JSON and legacy .sng formats)
   renderer/      # Electron renderer process (DOM/browser)
+    global.d.ts  # Type declarations for window.api
     index.html   # App shell
     style.css    # Styles
     renderer.ts  # UI logic, song list, verse selection, projector preview
