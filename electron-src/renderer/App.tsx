@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { SongList } from "./components/SongList";
 import { SongView } from "./components/SongView";
+import { SongToolbar } from "./components/SongToolbar";
 import { SettingsPanel } from "./components/SettingsPanel";
 import { BackgroundPanel } from "./components/BackgroundPanel";
 import { ScreenPreview } from "./components/ScreenPreview";
@@ -29,6 +30,9 @@ export function App() {
 
   const [prepared, setPrepared] = useState<ScreenState>(DEFAULT_SCREEN_STATE);
   const [live, setLive] = useState<ScreenState>(DEFAULT_SCREEN_STATE);
+
+  const [rightWidth, setRightWidth] = useState(300);
+  const resizing = useRef(false);
 
   useEffect(() => {
     api.listSongs().then(setSongs).catch(console.error);
@@ -79,6 +83,29 @@ export function App() {
     setLive({ ...prepared });
   }, [prepared]);
 
+  const handleResizeStart = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      resizing.current = true;
+      const startX = e.clientX;
+      const startW = rightWidth;
+
+      const onMove = (ev: MouseEvent) => {
+        if (!resizing.current) return;
+        const delta = startX - ev.clientX;
+        setRightWidth(Math.max(200, Math.min(600, startW + delta)));
+      };
+      const onUp = () => {
+        resizing.current = false;
+        document.removeEventListener("mousemove", onMove);
+        document.removeEventListener("mouseup", onUp);
+      };
+      document.addEventListener("mousemove", onMove);
+      document.addEventListener("mouseup", onUp);
+    },
+    [rightWidth]
+  );
+
   return (
     <div id="app">
       <main>
@@ -112,6 +139,8 @@ export function App() {
                   selectedVerses={selectedVerses}
                   onSelectSong={handleSelectSong}
                   onToggleVerse={handleToggleVerse}
+                  settings={screenSettings}
+                  onSettingsChange={handleSettingsChange}
                 />
                 <BackgroundPanel
                   selected={backgroundMedia}
@@ -126,6 +155,8 @@ export function App() {
                 selectedVerses={selectedVerses}
                 onSelectSong={handleSelectSong}
                 onToggleVerse={handleToggleVerse}
+                settings={screenSettings}
+                onSettingsChange={handleSettingsChange}
               />
             ) : activeTab === "background" ? (
               <BackgroundPanel
@@ -141,7 +172,9 @@ export function App() {
           </div>
         </div>
 
-        <div className="right-panel">
+        <div className="resize-handle" onMouseDown={handleResizeStart} />
+
+        <div className="right-panel" style={{ width: rightWidth }}>
           <ScreenPreview label="Pripravené" screen={prepared} />
           <div className="go-bar">
             <button className="go-button" onClick={handleGo}>
@@ -162,6 +195,8 @@ function SongsWithSearch({
   selectedVerses,
   onSelectSong,
   onToggleVerse,
+  settings,
+  onSettingsChange,
 }: {
   songs: string[];
   selectedFile: string | null;
@@ -169,6 +204,8 @@ function SongsWithSearch({
   selectedVerses: number[];
   onSelectSong: (f: string) => void;
   onToggleVerse: (index: number, ctrlKey: boolean) => void;
+  settings: ScreenSettings;
+  onSettingsChange: (patch: Partial<ScreenSettings>) => void;
 }) {
   const [search, setSearch] = useState("");
   const filtered = songs.filter((s) =>
@@ -177,6 +214,7 @@ function SongsWithSearch({
 
   return (
     <div className="songs-with-search">
+      <SongToolbar settings={settings} onChange={onSettingsChange} />
       <div className="songs-columns">
         <SongList
           songs={filtered}

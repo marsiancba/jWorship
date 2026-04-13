@@ -5,10 +5,16 @@ export interface Song {
   verses: string[];
 }
 
+export interface DirEntry {
+  name: string;
+  isDir: boolean;
+}
+
 export interface AppAPI {
   listSongs(): Promise<string[]>;
   loadSong(fileName: string): Promise<Song | null>;
-  listPictures(): Promise<string[]>;
+  listPictures(subPath: string): Promise<string[]>;
+  listDir(subPath: string): Promise<DirEntry[]>;
 }
 
 declare global {
@@ -27,6 +33,17 @@ export function getApi(): AppAPI {
       fetch(`/api/songs/${encodeURIComponent(fileName)}`).then((r) =>
         r.json()
       ),
-    listPictures: () => fetch("/api/pictures").then((r) => r.json()),
+    listPictures: (subPath: string) =>
+      fetch(`/api/pictures?path=${encodeURIComponent(subPath)}`).then((r) =>
+        r.json()
+      ),
+    listDir: (subPath: string) =>
+      fetch(`/api/pictures/dir?path=${encodeURIComponent(subPath)}`).then(
+        (r) => r.json()
+      ),
   };
+}
+
+export function picUrl(file: string): string {
+  return window.api ? `pictures:///${file}` : `/api/pictures/file/${file}`;
 }

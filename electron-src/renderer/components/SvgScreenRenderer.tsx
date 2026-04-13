@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState, useCallback } from "react";
 import type { ScreenState } from "../models/screen";
 import { TextAlign, TextAreaPart } from "../models/screen";
+import { picUrl } from "../api";
 
 interface SvgScreenRendererProps {
   screen: ScreenState;
@@ -30,12 +31,7 @@ export function SvgScreenRenderer({
 
   useEffect(() => {
     if (screen.backgroundMedia) {
-      const isElectron = Boolean(window.api);
-      setBgUrl(
-        isElectron
-          ? `pictures:///${screen.backgroundMedia}`
-          : `/api/pictures/file/${screen.backgroundMedia}`
-      );
+      setBgUrl(picUrl(screen.backgroundMedia));
     } else {
       setBgUrl(null);
     }
