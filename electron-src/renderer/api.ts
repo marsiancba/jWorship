@@ -5,18 +5,19 @@ export interface Song {
   verses: string[];
 }
 
-export interface SongAPI {
+export interface AppAPI {
   listSongs(): Promise<string[]>;
   loadSong(fileName: string): Promise<Song | null>;
+  listPictures(): Promise<string[]>;
 }
 
 declare global {
   interface Window {
-    api?: SongAPI;
+    api?: AppAPI;
   }
 }
 
-export function getSongApi(): SongAPI {
+export function getApi(): AppAPI {
   if (window.api) {
     return window.api;
   }
@@ -26,5 +27,6 @@ export function getSongApi(): SongAPI {
       fetch(`/api/songs/${encodeURIComponent(fileName)}`).then((r) =>
         r.json()
       ),
+    listPictures: () => fetch("/api/pictures").then((r) => r.json()),
   };
 }

@@ -2,11 +2,15 @@ import type { Song } from "../api";
 
 interface SongViewProps {
   song: Song | null;
-  activeVerse: string | null;
-  onSelectVerse: (verse: string) => void;
+  selectedVerses: number[];
+  onToggleVerse: (index: number, ctrlKey: boolean) => void;
 }
 
-export function SongView({ song, activeVerse, onSelectVerse }: SongViewProps) {
+export function SongView({
+  song,
+  selectedVerses,
+  onToggleVerse,
+}: SongViewProps) {
   if (!song) {
     return (
       <section id="song-view">
@@ -25,8 +29,8 @@ export function SongView({ song, activeVerse, onSelectVerse }: SongViewProps) {
         {song.verses.map((verse, i) => (
           <div
             key={i}
-            className={`verse${verse === activeVerse ? " active" : ""}`}
-            onClick={() => onSelectVerse(verse)}
+            className={`verse${selectedVerses.includes(i) ? " active" : ""}`}
+            onClick={(e) => onToggleVerse(i, e.ctrlKey || e.metaKey)}
           >
             <div className="verse-label">Verš {i + 1}</div>
             <div>{verse}</div>

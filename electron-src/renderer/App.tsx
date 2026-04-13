@@ -2,8 +2,9 @@ import { useState, useEffect, useCallback } from "react";
 import { SongList } from "./components/SongList";
 import { SongView } from "./components/SongView";
 import { SettingsPanel } from "./components/SettingsPanel";
+import { BackgroundPanel } from "./components/BackgroundPanel";
 import { ScreenPreview } from "./components/ScreenPreview";
-import { getSongApi, type Song } from "./api";
+import { getApi, type Song } from "./api";
 import {
   type ScreenSettings,
   type ScreenState,
@@ -11,7 +12,7 @@ import {
   DEFAULT_SCREEN_SETTINGS,
 } from "./models/screen";
 
-const api = getSongApi();
+const api = getApi();
 
 type Tab = "songs+bg" | "songs" | "background" | "settings";
 
@@ -19,10 +20,11 @@ export function App() {
   const [songs, setSongs] = useState<string[]>([]);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [song, setSong] = useState<Song | null>(null);
-  const [activeVerse, setActiveVerse] = useState<string | null>(null);
+  const [selectedVerses, setSelectedVerses] = useState<number[]>([]);
   const [screenSettings, setScreenSettings] = useState<ScreenSettings>(
     DEFAULT_SCREEN_SETTINGS
   );
+  const [backgroundMedia, setBackgroundMedia] = useState("");
   const [activeTab, setActiveTab] = useState<Tab>("songs+bg");
 
   const [prepared, setPrepared] = useState<ScreenState>(DEFAULT_SCREEN_STATE);
@@ -32,20 +34,39 @@ export function App() {
     api.listSongs().then(setSongs).catch(console.error);
   }, []);
 
+  const verseText = song
+    ? selectedVerses.map((i) => song.verses[i]).join("\n\n")
+    : "";
+
   useEffect(() => {
     setPrepared((prev) => ({
       ...prev,
       ...screenSettings,
-      text: activeVerse ?? "",
+      backgroundMedia,
+      text: verseText,
     }));
-  }, [screenSettings, activeVerse]);
+  }, [screenSettings, verseText, backgroundMedia]);
 
   const handleSelectSong = useCallback(async (fileName: string) => {
     setSelectedFile(fileName);
-    setActiveVerse(null);
+    setSelectedVerses([]);
     const loaded = await api.loadSong(fileName);
     setSong(loaded);
   }, []);
+
+  const handleToggleVerse = useCallback(
+    (index: number, ctrlKey: boolean) => {
+      setSelectedVerses((prev) => {
+        if (ctrlKey) {
+          return prev.includes(index)
+            ? prev.filter((i) => i !== index)
+            : [...prev, index].sort((a, b) => a - b);
+        }
+        return prev.length === 1 && prev[0] === index ? [] : [index];
+      });
+    },
+    []
+  );
 
   const handleSettingsChange = useCallback(
     (patch: Partial<ScreenSettings>) => {
@@ -83,27 +104,34 @@ export function App() {
 
           <div className="left-content">
             {activeTab === "songs+bg" ? (
-              <SongsWithSearch
-                songs={songs}
-                selectedFile={selectedFile}
-                song={song}
-                activeVerse={activeVerse}
-                onSelectSong={handleSelectSong}
-                onSelectVerse={setActiveVerse}
-              />
+              <div className="split-vertical">
+                <SongsWithSearch
+                  songs={songs}
+                  selectedFile={selectedFile}
+                  song={song}
+                  selectedVerses={selectedVerses}
+                  onSelectSong={handleSelectSong}
+                  onToggleVerse={handleToggleVerse}
+                />
+                <BackgroundPanel
+                  selected={backgroundMedia}
+                  onSelect={setBackgroundMedia}
+                />
+              </div>
             ) : activeTab === "songs" ? (
               <SongsWithSearch
                 songs={songs}
                 selectedFile={selectedFile}
                 song={song}
-                activeVerse={activeVerse}
+                selectedVerses={selectedVerses}
                 onSelectSong={handleSelectSong}
-                onSelectVerse={setActiveVerse}
+                onToggleVerse={handleToggleVerse}
               />
             ) : activeTab === "background" ? (
-              <div className="placeholder-panel">
-                <p>Pozadie — bude implementované</p>
-              </div>
+              <BackgroundPanel
+                selected={backgroundMedia}
+                onSelect={setBackgroundMedia}
+              />
             ) : (
               <SettingsPanel
                 settings={screenSettings}
@@ -131,16 +159,16 @@ function SongsWithSearch({
   songs,
   selectedFile,
   song,
-  activeVerse,
+  selectedVerses,
   onSelectSong,
-  onSelectVerse,
+  onToggleVerse,
 }: {
   songs: string[];
   selectedFile: string | null;
   song: Song | null;
-  activeVerse: string | null;
+  selectedVerses: number[];
   onSelectSong: (f: string) => void;
-  onSelectVerse: (v: string) => void;
+  onToggleVerse: (index: number, ctrlKey: boolean) => void;
 }) {
   const [search, setSearch] = useState("");
   const filtered = songs.filter((s) =>
@@ -157,14 +185,13 @@ function SongsWithSearch({
         />
         <SongView
           song={song}
-          activeVerse={activeVerse}
-          onSelectVerse={onSelectVerse}
+          selectedVerses={selectedVerses}
+          onToggleVerse={onToggleVerse}
         />
       </div>
       <div className="search-bar">
         <input
           type="text"
-          id="search"
           placeholder="Hľadať pieseň..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
