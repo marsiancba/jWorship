@@ -46,6 +46,11 @@ jWorship is a church worship presentation desktop application originally built i
 - **React components** use ESM and are bundled by Vite. They go through `contextBridge` for IPC.
 - The `api.ts` module provides `getSongApi()` which returns the Electron IPC bridge (`window.api` from preload) when available, or falls back to fetch-based API for browser-only dev.
 
+### Network egress domains required
+- `registry.npmjs.org` — npm packages
+- `release-assets.githubusercontent.com` — Electron binary download during `npm install`
+- `uploads.github.com` — needed only for uploading GitHub release assets (e.g. `gh release upload`)
+
 ### Node.js / npm
 - Node.js v22 via nvm. Project uses npm (`package-lock.json`).
 - Electron binary (~110 MB) downloads from `release-assets.githubusercontent.com` during `npm install`.
@@ -72,8 +77,19 @@ electron-src/
     preload.ts            # Electron context bridge
     components/
       SongList.tsx        # Song list sidebar
-      SongView.tsx        # Verse display panel
-      ProjectorPreview.tsx # Live projector preview
-src/                      # Legacy Java source (reference only)
-songs/                    # Song data directory (JSON files)
+      SongView.tsx        # Verse display (multi-select with Ctrl+click)
+      SongToolbar.tsx     # Quick-setting icon buttons above song list
+      ScreenPreview.tsx   # Responsive SVG preview wrapper
+      SvgScreenRenderer.tsx # SVG-based screen rendering with text wrapping
+      SettingsPanel.tsx   # Full settings editor
+      BackgroundPanel.tsx # Image browser with folder navigation
+  models/
+    screen.ts           # ScreenSettings, ScreenState, TextAlign, TextAreaPart
+src/                    # Legacy Java source (reference only)
+songs/                  # Song data directory (JSON files)
+pictures/               # Background images directory
 ```
+
+### Windows build
+- `npm run dist:win` builds a Windows zip in `release/`.
+- Uploading release assets via `gh release upload` requires `uploads.github.com` in the egress allowlist.
