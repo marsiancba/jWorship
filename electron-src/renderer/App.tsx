@@ -1,32 +1,44 @@
 import { useState, useEffect, useCallback } from "react";
 import { SongList } from "./components/SongList";
 import { SongView } from "./components/SongView";
-import { ProjectorPreview } from "./components/ProjectorPreview";
 import { SettingsPanel } from "./components/SettingsPanel";
+import { ScreenPreview } from "./components/ScreenPreview";
 import { getSongApi, type Song } from "./api";
 import {
   type ScreenSettings,
+  type ScreenState,
+  DEFAULT_SCREEN_STATE,
   DEFAULT_SCREEN_SETTINGS,
 } from "./models/screen";
 
 const api = getSongApi();
 
-type Tab = "songs" | "settings";
+type Tab = "songs+bg" | "songs" | "background" | "settings";
 
 export function App() {
   const [songs, setSongs] = useState<string[]>([]);
-  const [search, setSearch] = useState("");
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [song, setSong] = useState<Song | null>(null);
   const [activeVerse, setActiveVerse] = useState<string | null>(null);
   const [screenSettings, setScreenSettings] = useState<ScreenSettings>(
     DEFAULT_SCREEN_SETTINGS
   );
-  const [activeTab, setActiveTab] = useState<Tab>("songs");
+  const [activeTab, setActiveTab] = useState<Tab>("songs+bg");
+
+  const [prepared, setPrepared] = useState<ScreenState>(DEFAULT_SCREEN_STATE);
+  const [live, setLive] = useState<ScreenState>(DEFAULT_SCREEN_STATE);
 
   useEffect(() => {
     api.listSongs().then(setSongs).catch(console.error);
   }, []);
+
+  useEffect(() => {
+    setPrepared((prev) => ({
+      ...prev,
+      ...screenSettings,
+      text: activeVerse ?? "",
+    }));
+  }, [screenSettings, activeVerse]);
 
   const handleSelectSong = useCallback(async (fileName: string) => {
     setSelectedFile(fileName);
@@ -42,16 +54,114 @@ export function App() {
     []
   );
 
+  const handleGo = useCallback(() => {
+    setLive({ ...prepared });
+  }, [prepared]);
+
+  return (
+    <div id="app">
+      <main>
+        <div className="left-panel">
+          <nav className="tabs">
+            {(
+              [
+                ["songs+bg", "Piesne + Pozadie"],
+                ["songs", "Piesne"],
+                ["background", "Pozadie"],
+                ["settings", "Nastavenia"],
+              ] as [Tab, string][]
+            ).map(([id, label]) => (
+              <button
+                key={id}
+                className={activeTab === id ? "active" : ""}
+                onClick={() => setActiveTab(id)}
+              >
+                {label}
+              </button>
+            ))}
+          </nav>
+
+          <div className="left-content">
+            {activeTab === "songs+bg" ? (
+              <SongsWithSearch
+                songs={songs}
+                selectedFile={selectedFile}
+                song={song}
+                activeVerse={activeVerse}
+                onSelectSong={handleSelectSong}
+                onSelectVerse={setActiveVerse}
+              />
+            ) : activeTab === "songs" ? (
+              <SongsWithSearch
+                songs={songs}
+                selectedFile={selectedFile}
+                song={song}
+                activeVerse={activeVerse}
+                onSelectSong={handleSelectSong}
+                onSelectVerse={setActiveVerse}
+              />
+            ) : activeTab === "background" ? (
+              <div className="placeholder-panel">
+                <p>Pozadie — bude implementované</p>
+              </div>
+            ) : (
+              <SettingsPanel
+                settings={screenSettings}
+                onChange={handleSettingsChange}
+              />
+            )}
+          </div>
+        </div>
+
+        <div className="right-panel">
+          <ScreenPreview label="Pripravené" screen={prepared} />
+          <div className="go-bar">
+            <button className="go-button" onClick={handleGo}>
+              Na projektor!
+            </button>
+          </div>
+          <ScreenPreview label="Projekcia" screen={live} />
+        </div>
+      </main>
+    </div>
+  );
+}
+
+function SongsWithSearch({
+  songs,
+  selectedFile,
+  song,
+  activeVerse,
+  onSelectSong,
+  onSelectVerse,
+}: {
+  songs: string[];
+  selectedFile: string | null;
+  song: Song | null;
+  activeVerse: string | null;
+  onSelectSong: (f: string) => void;
+  onSelectVerse: (v: string) => void;
+}) {
+  const [search, setSearch] = useState("");
   const filtered = songs.filter((s) =>
     s.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
-    <div id="app">
-      <header>
-        <h1>
-          jWorship <span className="version">4.2</span>
-        </h1>
+    <div className="songs-with-search">
+      <div className="songs-columns">
+        <SongList
+          songs={filtered}
+          selectedFile={selectedFile}
+          onSelect={onSelectSong}
+        />
+        <SongView
+          song={song}
+          activeVerse={activeVerse}
+          onSelectVerse={onSelectVerse}
+        />
+      </div>
+      <div className="search-bar">
         <input
           type="text"
           id="search"
@@ -59,43 +169,7 @@ export function App() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <nav className="tabs">
-          <button
-            className={activeTab === "songs" ? "active" : ""}
-            onClick={() => setActiveTab("songs")}
-          >
-            Piesne
-          </button>
-          <button
-            className={activeTab === "settings" ? "active" : ""}
-            onClick={() => setActiveTab("settings")}
-          >
-            Nastavenia
-          </button>
-        </nav>
-      </header>
-      <main>
-        {activeTab === "songs" ? (
-          <>
-            <SongList
-              songs={filtered}
-              selectedFile={selectedFile}
-              onSelect={handleSelectSong}
-            />
-            <SongView
-              song={song}
-              activeVerse={activeVerse}
-              onSelectVerse={setActiveVerse}
-            />
-          </>
-        ) : (
-          <SettingsPanel
-            settings={screenSettings}
-            onChange={handleSettingsChange}
-          />
-        )}
-        <ProjectorPreview text={activeVerse} settings={screenSettings} />
-      </main>
+      </div>
     </div>
   );
 }
