@@ -1,8 +1,10 @@
 export interface Song {
   fileName: string;
   title: string;
+  title2: string;
   author: string;
   verses: string[];
+  format: "json" | "sng" | "txt";
 }
 
 export interface DirEntry {

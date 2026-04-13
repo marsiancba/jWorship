@@ -20,7 +20,9 @@ export function SongView({
     );
   }
 
-  const title = song.title + (song.author ? ` — ${song.author}` : "");
+  let title = song.title;
+  if (song.title2) title += ` (${song.title2})`;
+  if (song.author) title += ` — ${song.author}`;
 
   return (
     <section id="song-view">
