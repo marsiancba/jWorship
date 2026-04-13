@@ -54,6 +54,35 @@ header .version {
   border-color: #e94560;
 }
 
+/* Header tabs */
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-left: auto;
+}
+
+.tabs button {
+  padding: 0.35rem 0.8rem;
+  border: 1px solid #0f3460;
+  border-radius: 4px;
+  background: transparent;
+  color: #888;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.tabs button:hover {
+  color: #e0e0e0;
+  border-color: #e94560;
+}
+
+.tabs button.active {
+  background: #e94560;
+  color: #fff;
+  border-color: #e94560;
+}
+
 main {
   flex: 1;
   display: flex;
@@ -154,7 +183,7 @@ main {
 }
 
 #projector-preview {
-  flex: 1;
+  flex: 0 0 auto;
   margin: 0.5rem;
   background: #000;
   border-radius: 4px;
@@ -163,6 +192,7 @@ main {
   justify-content: center;
   aspect-ratio: 16 / 9;
   max-height: 200px;
+  overflow: hidden;
 }
 
 #projector-text {
@@ -172,4 +202,101 @@ main {
   line-height: 1.6;
   color: #fff;
   white-space: pre-wrap;
+}
+
+/* Settings panel */
+.settings-panel {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.settings-panel fieldset {
+  border: 1px solid #0f3460;
+  border-radius: 6px;
+  padding: 0.8rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.settings-panel legend {
+  color: #e94560;
+  font-weight: bold;
+  font-size: 0.9rem;
+  padding: 0 0.4rem;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+  font-size: 0.85rem;
+}
+
+.setting-row input[type="checkbox"] {
+  accent-color: #e94560;
+  width: 16px;
+  height: 16px;
+}
+
+.setting-row input[type="range"] {
+  flex: 1;
+  max-width: 180px;
+  accent-color: #e94560;
+}
+
+.setting-row input[type="color"] {
+  width: 36px;
+  height: 28px;
+  border: 1px solid #0f3460;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+}
+
+.setting-row select {
+  background: #1a1a2e;
+  color: #e0e0e0;
+  border: 1px solid #0f3460;
+  border-radius: 4px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.85rem;
+}
+
+.setting-label {
+  min-width: 110px;
+  color: #888;
+}
+
+.setting-value {
+  min-width: 40px;
+  color: #888;
+  font-size: 0.8rem;
+}
+
+.button-group {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.button-group button {
+  padding: 0.3rem 0.6rem;
+  border: 1px solid #0f3460;
+  border-radius: 4px;
+  background: transparent;
+  color: #e0e0e0;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.button-group button:hover {
+  border-color: #e94560;
+}
+
+.button-group button.active {
+  background: #e94560;
+  color: #fff;
+  border-color: #e94560;
 }

@@ -2,9 +2,16 @@ import { useState, useEffect, useCallback } from "react";
 import { SongList } from "./components/SongList";
 import { SongView } from "./components/SongView";
 import { ProjectorPreview } from "./components/ProjectorPreview";
+import { SettingsPanel } from "./components/SettingsPanel";
 import { getSongApi, type Song } from "./api";
+import {
+  type ScreenSettings,
+  DEFAULT_SCREEN_SETTINGS,
+} from "./models/screen";
 
 const api = getSongApi();
+
+type Tab = "songs" | "settings";
 
 export function App() {
   const [songs, setSongs] = useState<string[]>([]);
@@ -12,6 +19,10 @@ export function App() {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [song, setSong] = useState<Song | null>(null);
   const [activeVerse, setActiveVerse] = useState<string | null>(null);
+  const [screenSettings, setScreenSettings] = useState<ScreenSettings>(
+    DEFAULT_SCREEN_SETTINGS
+  );
+  const [activeTab, setActiveTab] = useState<Tab>("songs");
 
   useEffect(() => {
     api.listSongs().then(setSongs).catch(console.error);
@@ -23,6 +34,13 @@ export function App() {
     const loaded = await api.loadSong(fileName);
     setSong(loaded);
   }, []);
+
+  const handleSettingsChange = useCallback(
+    (patch: Partial<ScreenSettings>) => {
+      setScreenSettings((prev) => ({ ...prev, ...patch }));
+    },
+    []
+  );
 
   const filtered = songs.filter((s) =>
     s.toLowerCase().includes(search.toLowerCase())
@@ -41,19 +59,42 @@ export function App() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
+        <nav className="tabs">
+          <button
+            className={activeTab === "songs" ? "active" : ""}
+            onClick={() => setActiveTab("songs")}
+          >
+            Piesne
+          </button>
+          <button
+            className={activeTab === "settings" ? "active" : ""}
+            onClick={() => setActiveTab("settings")}
+          >
+            Nastavenia
+          </button>
+        </nav>
       </header>
       <main>
-        <SongList
-          songs={filtered}
-          selectedFile={selectedFile}
-          onSelect={handleSelectSong}
-        />
-        <SongView
-          song={song}
-          activeVerse={activeVerse}
-          onSelectVerse={setActiveVerse}
-        />
-        <ProjectorPreview text={activeVerse} />
+        {activeTab === "songs" ? (
+          <>
+            <SongList
+              songs={filtered}
+              selectedFile={selectedFile}
+              onSelect={handleSelectSong}
+            />
+            <SongView
+              song={song}
+              activeVerse={activeVerse}
+              onSelectVerse={setActiveVerse}
+            />
+          </>
+        ) : (
+          <SettingsPanel
+            settings={screenSettings}
+            onChange={handleSettingsChange}
+          />
+        )}
+        <ProjectorPreview text={activeVerse} settings={screenSettings} />
       </main>
     </div>
   );
