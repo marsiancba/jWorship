@@ -10,13 +10,37 @@
     "dev:electron": "tsc && tsc -p electron-src/renderer/tsconfig.preload.json && NODE_ENV=development electron . --no-sandbox",
     "start": "electron .",
     "lint": "eslint 'electron-src/**/*.{ts,tsx}'",
-    "test": "echo \"No tests configured yet\" && exit 0"
+    "test": "echo \"No tests configured yet\" && exit 0",
+    "pack:win": "npm run build && electron-builder --win --dir",
+    "dist:win": "npm run build && electron-builder --win"
+  },
+  "build": {
+    "appId": "sk.calvary.jworship",
+    "productName": "jWorship",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "songs/**/*"
+    ],
+    "win": {
+      "target": "zip",
+      "icon": null,
+      "signAndEditExecutable": false
+    }
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/marsiancba/jWorship.git"
   },
-  "keywords": ["worship", "presentation", "electron", "church", "react"],
+  "keywords": [
+    "worship",
+    "presentation",
+    "electron",
+    "church",
+    "react"
+  ],
   "author": "",
   "license": "ISC",
   "bugs": {
@@ -31,6 +55,7 @@
     "@typescript-eslint/parser": "^8.58.1",
     "@vitejs/plugin-react": "^6.0.1",
     "electron": "^41.2.0",
+    "electron-builder": "^26.8.1",
     "eslint": "^10.2.0",
     "typescript": "^6.0.2",
     "vite": "^8.0.8"
