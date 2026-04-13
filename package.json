@@ -4,23 +4,19 @@
   "description": "Worship presentation software – Electron/TypeScript migration of jWorship",
   "main": "dist/main/main.js",
   "scripts": {
-    "build": "tsc && cp electron-src/renderer/index.html electron-src/renderer/style.css dist/renderer/",
+    "build": "tsc && vite build --config electron-src/renderer/vite.config.ts && tsc -p electron-src/renderer/tsconfig.preload.json",
     "dev": "npm run build && electron .",
-    "dev:web": "npm run build && node dist/dev-server.js",
+    "dev:vite": "vite --config electron-src/renderer/vite.config.ts",
+    "dev:electron": "tsc && tsc -p electron-src/renderer/tsconfig.preload.json && NODE_ENV=development electron . --no-sandbox",
     "start": "electron .",
-    "lint": "eslint 'electron-src/**/*.ts'",
+    "lint": "eslint 'electron-src/**/*.{ts,tsx}'",
     "test": "echo \"No tests configured yet\" && exit 0"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/marsiancba/jWorship.git"
   },
-  "keywords": [
-    "worship",
-    "presentation",
-    "electron",
-    "church"
-  ],
+  "keywords": ["worship", "presentation", "electron", "church", "react"],
   "author": "",
   "license": "ISC",
   "bugs": {
@@ -29,10 +25,18 @@
   "homepage": "https://github.com/marsiancba/jWorship#readme",
   "devDependencies": {
     "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "@typescript-eslint/eslint-plugin": "^8.58.1",
     "@typescript-eslint/parser": "^8.58.1",
+    "@vitejs/plugin-react": "^6.0.1",
     "electron": "^41.2.0",
     "eslint": "^10.2.0",
-    "typescript": "^6.0.2"
+    "typescript": "^6.0.2",
+    "vite": "^8.0.8"
+  },
+  "dependencies": {
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5"
   }
 }

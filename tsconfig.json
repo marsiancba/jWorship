@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "commonjs",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "lib": ["ES2022"],
     "outDir": "dist",
     "rootDir": "electron-src",
     "strict": true,
@@ -11,9 +11,8 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "declaration": true,
-    "declarationMap": true,
     "sourceMap": true
   },
-  "include": ["electron-src/**/*.ts"],
+  "include": ["electron-src/main/**/*.ts", "electron-src/dev-server.ts"],
   "exclude": ["node_modules", "dist"]
 }

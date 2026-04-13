@@ -2,7 +2,7 @@
 
 ## Project overview
 
-jWorship is a church worship presentation desktop application originally built in Java 8 with JavaFX and Swing. The project goal is to **migrate from JavaFX/Java to TypeScript and Electron**.
+jWorship is a church worship presentation desktop application originally built in Java 8 with JavaFX and Swing. The project goal is to **migrate from JavaFX/Java to TypeScript, React, and Electron**.
 
 ### Legacy Java codebase (reference only)
 - Build: Maven (`pom.xml`), source in `src/` (flat layout, not `src/main/java/`)
@@ -20,54 +20,60 @@ jWorship is a church worship presentation desktop application originally built i
 - Settings persistence (JSON in `settings/` directory)
 - UI is in Slovak language
 
-### Electron/TypeScript codebase
-- Source: `electron-src/` (main process in `main/`, renderer in `renderer/`)
-- Build output: `dist/`
-- Entry point: `dist/main/main.js` (Electron main), `dist/dev-server.js` (web dev server)
-- See `package.json` scripts for build/lint/dev/test commands.
+### Electron/React/TypeScript codebase
+- **Renderer:** React + Vite in `electron-src/renderer/` (TSX components)
+- **Main process:** plain TypeScript in `electron-src/main/`
+- **Build output:** `dist/`
+- See `package.json` scripts for all commands.
 
 ## Cursor Cloud specific instructions
 
 ### Commands
-- **Build:** `npm run build`
-- **Lint:** `npm run lint`
-- **Dev (Electron):** `npm run dev` — builds then launches the native Electron desktop app
-- **Dev (web):** `npm run dev:web` — builds then starts a local HTTP server at http://localhost:3000
+- **Build:** `npm run build` — compiles main process (tsc), bundles renderer (Vite), compiles preload (tsc)
+- **Lint:** `npm run lint` — ESLint on all `electron-src/**/*.{ts,tsx}`
+- **Dev (Vite HMR):** run `npm run dev:vite` in one terminal, then `npm run dev:electron` in another — gives hot-reload for the renderer
+- **Dev (production build):** `npm run dev` — full build then launch Electron
 - **Test:** `npm test`
 
 ### Running Electron in this environment
-- Always pass `--no-sandbox` when running Electron: `DISPLAY=:1 npx electron . --no-sandbox`
-- DBus errors in the log (`Failed to connect to the bus`) are cosmetic and harmless in a container/VM.
-- SSL handshake errors for background Chromium network calls are caused by egress restrictions and are harmless.
-- The `npm run dev` script handles the `--no-sandbox` flag is not included in the package.json script — run `DISPLAY=:1 npx electron . --no-sandbox` directly, or use `npm run dev:web` for browser-based dev.
+- Pass `--no-sandbox`: `DISPLAY=:1 npx electron . --no-sandbox`
+- DBus errors in the log are cosmetic and harmless in containers.
+- The `dev:electron` script sets `NODE_ENV=development` so the main process loads `http://localhost:3000` (Vite dev server) instead of the built files.
 
-### Renderer code gotcha
-- The renderer runs in Electron's sandboxed browser context with `contextIsolation: true` and `nodeIntegration: false`.
-- Do NOT use `export` statements or ES module syntax in renderer `.ts` files — TypeScript compiles to CommonJS which uses `exports` (undefined in browser context).
-- Do NOT declare global variables that collide with names exposed by the preload script (e.g., `api` is exposed via `contextBridge`). Use unique names like `songApi`.
-- Type declarations for `window.api` live in `electron-src/renderer/global.d.ts`.
+### Architecture notes
+- **Two tsconfigs for the renderer:** `electron-src/renderer/tsconfig.json` (React/Vite, `noEmit`) and `tsconfig.preload.json` (preload script, CommonJS output). The root `tsconfig.json` is for the main process only.
+- **Preload script** must be CommonJS (Electron requirement). It is compiled separately via `tsconfig.preload.json`.
+- **React components** use ESM and are bundled by Vite. They go through `contextBridge` for IPC.
+- The `api.ts` module provides `getSongApi()` which returns the Electron IPC bridge (`window.api` from preload) when available, or falls back to fetch-based API for browser-only dev.
 
 ### Node.js / npm
 - Node.js v22 via nvm. Project uses npm (`package-lock.json`).
-- Electron binary (~110 MB) downloads from `release-assets.githubusercontent.com` during `npm install`. If that domain is blocked, use `npm install --ignore-scripts` and then `node node_modules/electron/install.js` separately.
+- Electron binary (~110 MB) downloads from `release-assets.githubusercontent.com` during `npm install`.
 
 ### Display / GUI testing
 - Virtual display (Xtigervnc) is on DISPLAY=:1.
-- For web-mode dev (`npm run dev:web`), open http://localhost:3000 in Chrome.
+- For Vite dev server, open http://localhost:3000 in Chrome.
 
 ### Project structure
 ```
 electron-src/
-  main/          # Electron main process (Node.js)
-    main.ts      # App entry, window creation, IPC handlers
-    songStore.ts # Song file loading (JSON and legacy .sng formats)
-  renderer/      # Electron renderer process (DOM/browser)
-    global.d.ts  # Type declarations for window.api
-    index.html   # App shell
-    style.css    # Styles
-    renderer.ts  # UI logic, song list, verse selection, projector preview
-    preload.ts   # Context bridge (Electron preload script)
-  dev-server.ts  # Lightweight HTTP server for browser-based development
-src/             # Legacy Java source (reference only)
-songs/           # Song data directory (JSON files)
+  main/                   # Electron main process (Node.js, CommonJS)
+    main.ts               # App entry, window creation, IPC handlers
+    songStore.ts          # Song file loading (JSON and legacy .sng)
+  renderer/               # Electron renderer (React + Vite, ESM)
+    vite.config.ts        # Vite build config
+    tsconfig.json         # React/Vite tsconfig (noEmit, bundler resolution)
+    tsconfig.preload.json # Preload-only tsconfig (CommonJS output)
+    index.html            # Vite entry HTML
+    main.tsx              # React root mount
+    App.tsx               # Top-level App component
+    api.ts                # Song API abstraction (IPC or fetch)
+    style.css             # Global styles
+    preload.ts            # Electron context bridge
+    components/
+      SongList.tsx        # Song list sidebar
+      SongView.tsx        # Verse display panel
+      ProjectorPreview.tsx # Live projector preview
+src/                      # Legacy Java source (reference only)
+songs/                    # Song data directory (JSON files)
 ```

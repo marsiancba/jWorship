@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain } from "electron";
 import * as path from "path";
 import { SongStore } from "./songStore";
 
+const isDev = process.env.NODE_ENV === "development";
 let mainWindow: BrowserWindow | null = null;
 const songStore = new SongStore(path.join(process.cwd(), "songs"));
 
@@ -17,9 +18,13 @@ function createWindow(): void {
     },
   });
 
-  mainWindow.loadFile(
-    path.join(__dirname, "..", "renderer", "index.html")
-  );
+  if (isDev) {
+    mainWindow.loadURL("http://localhost:3000");
+  } else {
+    mainWindow.loadFile(
+      path.join(__dirname, "..", "renderer", "index.html")
+    );
+  }
 
   mainWindow.on("closed", () => {
     mainWindow = null;
